@@ -1,5 +1,5 @@
 <div>
-    <div class="container-fluid py-4">
+    <div class="container-fluid">
         <h2 class="mb-4">Dashboard</h2>
 
         <div class="row mb-4">
