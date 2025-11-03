@@ -17,6 +17,9 @@ class DatabaseSeeder extends Seeder
         // Creăm mai întâi rolurile
         $this->call([
             RoleSeeder::class,
+            CurrencySeeder::class,
+            LanguageSeeder::class,
+            SettingsSeeder::class,
         ]);
 
         // User::factory(10)->create();

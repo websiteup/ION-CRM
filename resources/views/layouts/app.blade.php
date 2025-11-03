@@ -56,6 +56,10 @@
                             <i class="bi bi-person-badge"></i>
                             <span>Utilizatori</span>
                         </a>
+                        <a href="{{ route('admin.settings.index') }}" class="sidebar-link {{ request()->routeIs('admin.settings.*') ? 'active' : '' }}">
+                            <i class="bi bi-gear"></i>
+                            <span>Setări</span>
+                        </a>
                     @endif
                     
                     <div class="sidebar-divider"></div>
@@ -132,6 +136,8 @@
                                     $pageTitle = 'Utilizatori';
                                 } elseif (request()->routeIs('admin.profile')) {
                                     $pageTitle = 'Profilul Meu';
+                                } elseif (request()->routeIs('admin.settings.*')) {
+                                    $pageTitle = 'Setări';
                                 }
                             @endphp
                             {{ $pageTitle }}

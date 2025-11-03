@@ -7,6 +7,7 @@ use App\Livewire\Admin\ServicesComponent;
 use App\Livewire\Admin\DashboardComponent;
 use App\Livewire\Admin\UsersComponent;
 use App\Livewire\Admin\ProfileComponent;
+use App\Livewire\Admin\SettingsComponent;
 
 Route::get('/', function () {
     return view('welcome');
@@ -26,5 +27,6 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/admin/clients', ClientsComponent::class)->name('admin.clients.index');
         Route::get('/admin/services', ServicesComponent::class)->name('admin.services.index');
         Route::get('/admin/users', UsersComponent::class)->name('admin.users.index');
+        Route::get('/admin/settings', SettingsComponent::class)->name('admin.settings.index');
     });
 });
