@@ -14,7 +14,14 @@
                         </div>
                     @endif
 
-                    {{ __('You are logged in!') }}
+                    <p>{{ __('You are logged in!') }}</p>
+                    
+                    <div class="mt-4">
+                        <a href="{{ route('admin.dashboard') }}" class="btn btn-primary me-2">Dashboard Admin</a>
+                        <a href="{{ route('admin.clients.index') }}" class="btn btn-info me-2">Clienți</a>
+                        <a href="{{ route('admin.services.index') }}" class="btn btn-success me-2">Servicii</a>
+                        <a href="{{ route('admin.users.index') }}" class="btn btn-warning">Utilizatori</a>
+                    </div>
                 </div>
             </div>
         </div>

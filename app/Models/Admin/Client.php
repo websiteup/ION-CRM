@@ -9,7 +9,7 @@ class Client extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['first_name', 'last_name', 'email', 'phone', 'country', 'address'];
+    protected $fillable = ['type', 'first_name', 'last_name', 'email', 'phone', 'country', 'address'];
     // Definirea relațiilor cu alte modele (de exemplu, Proposals)
 
 }

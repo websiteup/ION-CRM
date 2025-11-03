@@ -18,8 +18,15 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
+        'first_name',
+        'last_name',
+        'nickname',
+        'position',
         'email',
+        'phone',
         'password',
+        'profile_photo',
+        'email_signature',
     ];
 
     /**
@@ -43,5 +50,30 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Get the roles that belong to the user.
+     */
+    public function roles()
+    {
+        return $this->belongsToMany(Role::class);
+    }
+
+    /**
+     * Check if user has a specific role.
+     */
+    public function hasRole($role)
+    {
+        // Verificăm dacă rolurile sunt deja încărcate
+        if (!$this->relationLoaded('roles')) {
+            $this->load('roles');
+        }
+        
+        if (is_string($role)) {
+            return $this->roles->contains('slug', $role);
+        }
+        
+        return $this->roles->contains('id', $role);
     }
 }
