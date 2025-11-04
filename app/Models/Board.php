@@ -78,11 +78,23 @@ class Board extends Model
     }
 
     /**
+     * Get the members of this board.
+     */
+    public function members()
+    {
+        return $this->belongsToMany(User::class, 'board_members')
+            ->withPivot('role')
+            ->withTimestamps();
+    }
+
+    /**
      * Generate public hash for board
      */
     public function generatePublicHash()
     {
-        $this->public_hash = Str::random(32);
+        do {
+            $this->public_hash = Str::random(32);
+        } while (Board::where('public_hash', $this->public_hash)->exists());
         $this->save();
     }
 }

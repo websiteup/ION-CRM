@@ -9,25 +9,15 @@
                 <button wire:click="openColumnModal" class="btn btn-primary">
                     <i class="bi bi-plus-circle"></i> Adaugă Coloană
                 </button>
+                <button wire:click="openShareModal" class="btn btn-outline-primary">
+                    <i class="bi bi-share"></i> Share
+                </button>
                 <a href="{{ route('admin.boards.index') }}" class="btn btn-secondary">
                     <i class="bi bi-arrow-left"></i> Înapoi
                 </a>
             </div>
         </div>
 
-        @if (session()->has('message'))
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                {{ session('message') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        @endif
-
-        @if (session()->has('error'))
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                {{ session('error') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        @endif
 
         <!-- Filters -->
         <div class="card mb-3">
@@ -66,9 +56,11 @@
         </div>
 
         <!-- Kanban Board -->
-        <div class="row" id="kanban-board" wire:key="kanban-board-{{ $board->id }}">
+        <div class="kanban-board-container" id="kanban-board" wire:key="kanban-board-{{ $board->id }}">
             @foreach($columns as $column)
-                <div class="col-md-3 mb-4" wire:key="column-{{ $column->id }}">
+                <div class="kanban-column-wrapper" 
+                     wire:key="column-{{ $column->id }}"
+                     data-column-id="{{ $column->id }}">
                     <div class="card" style="border-top: 4px solid {{ $column->color }};">
                         <div class="card-header d-flex justify-content-between align-items-center" style="background-color: {{ $column->color }}20;">
                             @if($editingColumnId === $column->id)
@@ -119,7 +111,7 @@
                                      wire:key="task-{{ $task->id }}">
                                     <div class="card-body p-2">
                                         <div class="d-flex justify-content-between align-items-start mb-2">
-                                            <h6 class="mb-0">{{ $task->title }}</h6>
+                                            <h6 class="mb-0 task-title-clickable" wire:click.stop="openTaskModal(null, {{ $task->id }})">{{ $task->title }}</h6>
                                             <div class="dropdown">
                                                 <button class="btn btn-sm btn-link" type="button" data-bs-toggle="dropdown">
                                                     <i class="bi bi-three-dots"></i>
@@ -173,8 +165,9 @@
                                     <small>Nu există task-uri</small>
                                 </div>
                             @endif
-
-                            <button wire:click="openTaskModal({{ $column->id }})" class="btn btn-sm btn-outline-primary w-100 mt-2 no-drag">
+                        </div>
+                        <div class="card-footer">
+                            <button wire:click="openTaskModal({{ $column->id }})" class="btn btn-sm btn-outline-primary w-100 no-drag">
                                 <i class="bi bi-plus"></i> Adaugă Task
                             </button>
                         </div>
@@ -302,17 +295,210 @@
             </div>
         </div>
     @endif
+
+    <!-- Share Modal -->
+    @if($showShareModal)
+        <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5); z-index: 1050;">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Share board</h5>
+                        <button type="button" wire:click="closeShareModal" class="btn-close"></button>
+                    </div>
+                    <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+                        <!-- Invite Members Section -->
+                        <div class="mb-4">
+                            <div class="d-flex gap-2 mb-3">
+                                <div class="flex-grow-1">
+                                    <input type="text" 
+                                           wire:model="shareEmail" 
+                                           class="form-control @error('shareEmail') is-invalid @enderror" 
+                                           placeholder="Email address or name">
+                                    @error('shareEmail') 
+                                        <div class="invalid-feedback">{{ $message }}</div> 
+                                    @enderror
+                                </div>
+                                <div>
+                                    <select wire:model="inviteRole" class="form-select">
+                                        <option value="member">Member</option>
+                                        <option value="admin">Admin</option>
+                                        <option value="viewer">Viewer</option>
+                                    </select>
+                                </div>
+                                <button wire:click="inviteMember" class="btn btn-primary">
+                                    Share
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Link Sharing Section -->
+                        @if($board->is_public)
+                            <div class="mb-4">
+                                <div class="d-flex align-items-start gap-3 mb-2">
+                                    <i class="bi bi-link-45deg fs-4"></i>
+                                    <div class="flex-grow-1">
+                                        <p class="mb-2">Anyone with the link can join as a member</p>
+                                        <div class="d-flex gap-2 align-items-center">
+                                            @if($board->public_hash)
+                                                <a href="#" wire:click.prevent="copyPublicLink" class="text-primary text-decoration-none">
+                                                    Copy link
+                                                </a>
+                                                <span>|</span>
+                                                <a href="#" wire:click.prevent="deletePublicLink" class="text-danger text-decoration-none">
+                                                    Delete link
+                                                </a>
+                                            @else
+                                                <span class="text-muted">Link-ul va fi generat după activarea board-ului public</span>
+                                            @endif
+                                            <span class="ms-auto">
+                                                <select wire:model="linkPermissions" wire:change="updateLinkPermissions($event.target.value)" class="form-select form-select-sm" style="width: auto; display: inline-block;">
+                                                    <option value="member">Change permissions</option>
+                                                    <option value="member">Member</option>
+                                                    <option value="admin">Admin</option>
+                                                    <option value="viewer">Viewer</option>
+                                                </select>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+
+                        <!-- Public/Private Toggle -->
+                        <div class="mb-4">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" 
+                                       type="checkbox" 
+                                       @if($board->is_public) checked @endif
+                                       wire:change="togglePublic"
+                                       id="boardPublicToggle">
+                                <label class="form-check-label" for="boardPublicToggle">
+                                    Board public
+                                </label>
+                            </div>
+                            @if($board->is_public && $board->public_hash)
+                                <div class="mt-2">
+                                    <small class="text-muted">Link public: 
+                                        <a href="{{ route('public.board', $board->public_hash) }}" target="_blank">
+                                            {{ route('public.board', $board->public_hash) }}
+                                        </a>
+                                    </small>
+                                </div>
+                            @endif
+                        </div>
+
+                        <!-- Tabs -->
+                        <ul class="nav nav-tabs mb-3" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link {{ $activeShareTab === 'members' ? 'active' : '' }}" 
+                                        wire:click="switchShareTab('members')" 
+                                        type="button">
+                                    Board members
+                                    @if($boardMembers->count() > 0)
+                                        <span class="badge bg-secondary">{{ $boardMembers->count() }}</span>
+                                    @endif
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link {{ $activeShareTab === 'requests' ? 'active' : '' }}" 
+                                        wire:click="switchShareTab('requests')" 
+                                        type="button">
+                                    Join requests
+                                </button>
+                            </li>
+                        </ul>
+
+                        <!-- Tab Content: Board Members -->
+                        @if($activeShareTab === 'members')
+                            <div class="list-group">
+                                @forelse($boardMembers as $member)
+                                    <div class="list-group-item d-flex align-items-center justify-content-between">
+                                        <div class="d-flex align-items-center gap-3">
+                                            @if($member->profile_photo)
+                                                <img src="{{ asset('storage/' . $member->profile_photo) }}" 
+                                                     alt="{{ $member->name }}" 
+                                                     class="rounded-circle" 
+                                                     style="width: 40px; height: 40px; object-fit: cover;">
+                                            @else
+                                                <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center" 
+                                                     style="width: 40px; height: 40px;">
+                                                    <span class="text-white">{{ strtoupper(substr($member->name, 0, 1)) }}</span>
+                                                </div>
+                                            @endif
+                                            <div>
+                                                <div class="fw-bold">
+                                                    {{ $member->first_name }} {{ $member->last_name }}
+                                                    @if($member->id === Auth::id())
+                                                        <span class="text-muted">(you)</span>
+                                                    @endif
+                                                </div>
+                                                <div class="text-muted small">
+                                                    {{ $member->email }}
+                                                    @if($member->position)
+                                                        • {{ $member->position }}
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex align-items-center gap-2">
+                                            @php
+                                                $memberPivot = $board->members()->wherePivot('user_id', $member->id)->first();
+                                                $memberRole = $memberPivot ? $memberPivot->pivot->role : 'member';
+                                                $adminCount = $boardMembers->filter(function($m) use ($board) {
+                                                    $pivot = $board->members()->wherePivot('user_id', $m->id)->first();
+                                                    return $pivot && $pivot->pivot->role === 'admin';
+                                                })->count();
+                                            @endphp
+                                            <select wire:change="updateMemberRole({{ $member->id }}, $event.target.value)"
+                                                    class="form-select form-select-sm" 
+                                                    style="width: auto;">
+                                                <option value="member" {{ $memberRole === 'member' ? 'selected' : '' }}>Member</option>
+                                                <option value="admin" {{ $memberRole === 'admin' ? 'selected' : '' }}>Admin</option>
+                                                <option value="viewer" {{ $memberRole === 'viewer' ? 'selected' : '' }}>Viewer</option>
+                                            </select>
+                                            @if($member->id !== Auth::id() || $adminCount > 1)
+                                                <button wire:click="removeMember({{ $member->id }})" 
+                                                        wire:confirm="Ești sigur că vrei să ștergi acest membru?"
+                                                        class="btn btn-sm btn-link text-danger">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            @endif
+                                        </div>
+                                    </div>
+                                @empty
+                                    <div class="text-center py-4 text-muted">
+                                        <i class="bi bi-people fs-1"></i>
+                                        <p class="mt-2">Nu există membri în board</p>
+                                    </div>
+                                @endforelse
+                            </div>
+                        @endif
+
+                        <!-- Tab Content: Join Requests -->
+                        @if($activeShareTab === 'requests')
+                            <div class="text-center py-4 text-muted">
+                                <i class="bi bi-inbox fs-1"></i>
+                                <p class="mt-2">Nu există cereri de alăturare</p>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
 </div>
 
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 <script>
     let sortableInstances = {};
+    let columnSortable = null;
 
     document.addEventListener('livewire:init', () => {
         Livewire.hook('morph', ({ el, component }) => {
             setTimeout(() => {
                 initializeSortable();
+                initializeColumnSortable();
             }, 100);
         });
         
@@ -332,12 +518,14 @@
         Livewire.on('column-saved', () => {
             setTimeout(() => {
                 initializeSortable();
+                initializeColumnSortable();
             }, 100);
         });
         
         Livewire.on('column-deleted', () => {
             setTimeout(() => {
                 initializeSortable();
+                initializeColumnSortable();
             }, 100);
         });
         
@@ -352,11 +540,48 @@
                 initializeSortable();
             }, 100);
         });
+
+        Livewire.on('column-position-updated', () => {
+            setTimeout(() => {
+                initializeColumnSortable();
+            }, 100);
+        });
     });
 
     document.addEventListener('DOMContentLoaded', function() {
         initializeSortable();
+        initializeColumnSortable();
     });
+
+    function initializeColumnSortable() {
+        const kanbanBoard = document.getElementById('kanban-board');
+        if (!kanbanBoard) return;
+
+        // Destroy existing instance
+        if (columnSortable) {
+            columnSortable.destroy();
+            columnSortable = null;
+        }
+
+        // Initialize column sortable
+        columnSortable = new Sortable(kanbanBoard, {
+            animation: 150,
+            ghostClass: 'sortable-ghost',
+            dragClass: 'sortable-drag',
+            handle: '.card-header', // Allow dragging from header only
+            filter: '.card-footer, .card-body, .no-drag, .btn', // Exclude footer, body, and buttons from drag
+            onEnd: function(evt) {
+                const columnWrappers = Array.from(kanbanBoard.querySelectorAll('.kanban-column-wrapper'));
+                const columnIds = columnWrappers.map(wrapper => {
+                    return wrapper.getAttribute('data-column-id');
+                }).filter(id => id !== null);
+
+                if (columnIds.length > 0) {
+                    @this.call('updateColumnPosition', columnIds);
+                }
+            }
+        });
+    }
 
     function initializeSortable() {
         // Destroy existing instances
@@ -387,7 +612,7 @@
                     animation: 150,
                     ghostClass: 'sortable-ghost',
                     dragClass: 'sortable-drag',
-                    filter: '.btn, .no-drag',
+                    filter: '.btn, .no-drag, .task-title-clickable',
                     draggable: '.task-card',
                     onEnd: function(evt) {
                         const taskId = evt.item.dataset.taskId;
@@ -462,6 +687,18 @@
         observer.observe(document.body, {
             childList: true,
             subtree: true
+        });
+
+        // Copy to clipboard functionality
+        Livewire.on('copy-to-clipboard', (data) => {
+            if (data.url) {
+                navigator.clipboard.writeText(data.url).then(() => {
+                    // Toast notification is already shown via Livewire event
+                }).catch(err => {
+                    console.error('Failed to copy:', err);
+                    toastr.error('Nu s-a putut copia link-ul în clipboard!', 'Eroare!');
+                });
+            }
         });
     });
 </script>

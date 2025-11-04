@@ -76,11 +76,11 @@ class BoardsComponent extends Component
         $data = [
             'name' => $this->boardName,
             'project_id' => $this->projectId,
-            'is_public' => $this->isPublic,
+            'is_public' => $this->boardId ? $this->isPublic : false, // Board-urile noi sunt întotdeauna private
         ];
 
-        // Only admin can make board public
-        if ($this->isPublic && !Auth::user()->hasRole('admin')) {
+        // Only admin can make board public (only when editing)
+        if ($this->boardId && $this->isPublic && !Auth::user()->hasRole('admin')) {
             $this->isPublic = false;
             $data['is_public'] = false;
         }
@@ -100,10 +100,10 @@ class BoardsComponent extends Component
             $data['created_by'] = Auth::id();
             $board = Board::create($data);
             
-            // Generate hash if public
-            if ($this->isPublic) {
-                $board->generatePublicHash();
-            }
+            // Board-urile noi sunt întotdeauna private, deci nu generăm hash
+            
+            // Add creator as admin member
+            $board->members()->attach(Auth::id(), ['role' => 'admin']);
             
             // Create default columns
             $defaultColumns = ['To Do', 'In Progress', 'Done'];

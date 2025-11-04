@@ -124,7 +124,7 @@
                                 </select>
                                 @error('projectId') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
-                            @if(Auth::user()->hasRole('admin'))
+                            @if($boardId && Auth::user()->hasRole('admin'))
                                 <div class="mb-3 form-check">
                                     <input type="checkbox" wire:model="isPublic" class="form-check-input" id="isPublic">
                                     <label class="form-check-label" for="isPublic">Board Public (pentru clienți)</label>

@@ -9,6 +9,75 @@
 // Bootstrap
 @import 'bootstrap/scss/bootstrap';
 
+// Kanban Board Styles
+.kanban-board-container {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    padding: 8px 0;
+    align-items: flex-start;
+}
+
+.kanban-column-wrapper {
+    cursor: move;
+    width: 272px;
+    flex-shrink: 0;
+}
+
+.kanban-column-wrapper .card {
+    cursor: default;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.kanban-column-wrapper .card-header {
+    cursor: move;
+    flex-shrink: 0;
+}
+
+.kanban-column-body {
+    min-height: 200px !important;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow-y: auto;
+}
+
+.kanban-column-wrapper .card-footer {
+    flex-shrink: 0;
+}
+
+.task-card {
+    user-select: none;
+    cursor: move;
+    flex-shrink: 0; /* Prevent task cards from stretching */
+}
+
+.task-title-clickable {
+    cursor: pointer;
+    transition: color 0.2s ease;
+    
+    &:hover {
+        color: #0d6efd;
+        text-decoration: underline;
+    }
+}
+
+.no-drag {
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.sortable-ghost {
+    opacity: 0.4;
+}
+
+.sortable-drag {
+    opacity: 0.8;
+}
+
 // Sidebar Styles
 .sidebar {
     width: 260px;
@@ -191,6 +260,7 @@
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+    overflow: auto;
     
     @media (max-width: 767.98px) {
         margin-left: 0;
