@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             CurrencySeeder::class,
             LanguageSeeder::class,
             SettingsSeeder::class,
+            LabelSeeder::class,
         ]);
 
         // User::factory(10)->create();

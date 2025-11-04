@@ -62,6 +62,17 @@
                         </a>
                     @endif
                     
+                    @if(Auth::user()->hasRole('admin') || Auth::user()->hasRole('manager'))
+                        <a href="{{ route('admin.projects.index') }}" class="sidebar-link {{ request()->routeIs('admin.projects.*') ? 'active' : '' }}">
+                            <i class="bi bi-folder"></i>
+                            <span>Proiecte</span>
+                        </a>
+                        <a href="{{ route('admin.boards.index') }}" class="sidebar-link {{ request()->routeIs('admin.boards.*') ? 'active' : '' }}">
+                            <i class="bi bi-kanban"></i>
+                            <span>Board-uri</span>
+                        </a>
+                    @endif
+                    
                     <div class="sidebar-divider"></div>
                     
                     <a href="{{ route('admin.profile') }}" class="sidebar-link {{ request()->routeIs('admin.profile') ? 'active' : '' }}">
@@ -138,6 +149,10 @@
                                     $pageTitle = 'Profilul Meu';
                                 } elseif (request()->routeIs('admin.settings.*')) {
                                     $pageTitle = 'Setări';
+                                } elseif (request()->routeIs('admin.boards.*')) {
+                                    $pageTitle = request()->routeIs('admin.boards.view') ? 'Board' : 'Board-uri';
+                                } elseif (request()->routeIs('admin.projects.*')) {
+                                    $pageTitle = request()->routeIs('admin.projects.view') ? 'Proiect' : 'Proiecte';
                                 }
                             @endphp
                             {{ $pageTitle }}
