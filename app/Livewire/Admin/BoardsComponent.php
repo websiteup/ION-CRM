@@ -95,7 +95,7 @@ class BoardsComponent extends Component
                 $board->generatePublicHash();
             }
             
-            session()->flash('message', 'Board actualizat cu succes!');
+            notify()->success('Board actualizat cu succes!');
         } else {
             $data['created_by'] = Auth::id();
             $board = Board::create($data);
@@ -115,7 +115,7 @@ class BoardsComponent extends Component
                 ]);
             }
             
-            session()->flash('message', 'Board creat cu succes!');
+            notify()->success('Board creat cu succes!');
         }
 
         $this->closeModal();
@@ -124,14 +124,14 @@ class BoardsComponent extends Component
     public function deleteBoard($id)
     {
         Board::findOrFail($id)->delete();
-        session()->flash('message', 'Board șters cu succes!');
+        notify()->success('Board șters cu succes!');
     }
 
     public function togglePublic($id)
     {
         $board = Board::findOrFail($id);
         if (!Auth::user()->hasRole('admin')) {
-            session()->flash('error', 'Doar administratorii pot face board-uri publice!');
+            notify()->error('Doar administratorii pot face board-uri publice!');
             return;
         }
 
@@ -140,7 +140,7 @@ class BoardsComponent extends Component
             $board->generatePublicHash();
         }
         $board->save();
-        session()->flash('message', 'Status board actualizat cu succes!');
+        notify()->success('Status board actualizat cu succes!');
     }
 
     public function render()

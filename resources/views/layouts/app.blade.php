@@ -16,152 +16,8 @@
     <!-- Summernote CSS -->
     <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote-lite.min.css" rel="stylesheet">
     
-    <!-- Toastr CSS -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet">
-    
-    <!-- Custom Toastr Styles -->
-    <style>
-        #toast-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 9999;
-        }
-        
-        #toast-container > div {
-            opacity: 1 !important;
-            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.25) !important;
-            border-radius: 8px !important;
-            padding: 15px 20px !important;
-            min-width: 300px !important;
-            max-width: 450px !important;
-        }
-        
-        .toast {
-            opacity: 1 !important;
-            border-left: 4px solid !important;
-        }
-        
-        .toast-success {
-            background-color: #10b981 !important;
-            color: #fff !important;
-            border-left-color: #059669 !important;
-        }
-        
-        .toast-success .toast-title {
-            color: #fff !important;
-            font-weight: 600 !important;
-            font-size: 16px !important;
-            margin-bottom: 5px !important;
-        }
-        
-        .toast-success .toast-message {
-            color: #fff !important;
-            font-weight: 400 !important;
-            font-size: 14px !important;
-            line-height: 1.5 !important;
-        }
-        
-        .toast-success .toast-close-button {
-            color: rgba(255, 255, 255, 0.9) !important;
-            font-weight: bold !important;
-            font-size: 18px !important;
-        }
-        
-        .toast-success .toast-progress {
-            background-color: rgba(255, 255, 255, 0.4) !important;
-        }
-        
-        .toast-error {
-            background-color: #ef4444 !important;
-            color: #fff !important;
-            border-left-color: #dc2626 !important;
-        }
-        
-        .toast-error .toast-title {
-            color: #fff !important;
-            font-weight: 600 !important;
-            font-size: 16px !important;
-            margin-bottom: 5px !important;
-        }
-        
-        .toast-error .toast-message {
-            color: #fff !important;
-            font-weight: 400 !important;
-            font-size: 14px !important;
-            line-height: 1.5 !important;
-        }
-        
-        .toast-error .toast-close-button {
-            color: rgba(255, 255, 255, 0.9) !important;
-            font-weight: bold !important;
-            font-size: 18px !important;
-        }
-        
-        .toast-error .toast-progress {
-            background-color: rgba(255, 255, 255, 0.4) !important;
-        }
-        
-        .toast-info {
-            background-color: #3b82f6 !important;
-            color: #fff !important;
-            border-left-color: #2563eb !important;
-        }
-        
-        .toast-info .toast-title {
-            color: #fff !important;
-            font-weight: 600 !important;
-            font-size: 16px !important;
-            margin-bottom: 5px !important;
-        }
-        
-        .toast-info .toast-message {
-            color: #fff !important;
-            font-weight: 400 !important;
-            font-size: 14px !important;
-            line-height: 1.5 !important;
-        }
-        
-        .toast-info .toast-close-button {
-            color: rgba(255, 255, 255, 0.9) !important;
-            font-weight: bold !important;
-            font-size: 18px !important;
-        }
-        
-        .toast-info .toast-progress {
-            background-color: rgba(255, 255, 255, 0.4) !important;
-        }
-        
-        .toast-warning {
-            background-color: #f59e0b !important;
-            color: #fff !important;
-            border-left-color: #d97706 !important;
-        }
-        
-        .toast-warning .toast-title {
-            color: #fff !important;
-            font-weight: 600 !important;
-            font-size: 16px !important;
-            margin-bottom: 5px !important;
-        }
-        
-        .toast-warning .toast-message {
-            color: #fff !important;
-            font-weight: 400 !important;
-            font-size: 14px !important;
-            line-height: 1.5 !important;
-        }
-        
-        .toast-warning .toast-close-button {
-            color: rgba(255, 255, 255, 0.9) !important;
-            font-weight: bold !important;
-            font-size: 18px !important;
-        }
-        
-        .toast-warning .toast-progress {
-            background-color: rgba(255, 255, 255, 0.4) !important;
-        }
-    </style>
+    <!-- Toastify CSS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 
     <!-- Scripts -->
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
@@ -358,76 +214,49 @@
         @endauth
     </div>
 
-    <!-- Toastr JS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <!-- Toastify JS -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     
     <script>
-        // Configure Toastr
-        toastr.options = {
-            "closeButton": true,
-            "debug": false,
-            "newestOnTop": true,
-            "progressBar": true,
-            "positionClass": "toast-top-right",
-            "preventDuplicates": true,
-            "onclick": null,
-            "showDuration": "400",
-            "hideDuration": "500",
-            "timeOut": "6000",
-            "extendedTimeOut": "1000",
-            "showEasing": "swing",
-            "hideEasing": "swing",
-            "showMethod": "slideDown",
-            "hideMethod": "slideUp"
-        };
+        // Toastify helper function
+        function showToastify(type, message) {
+            const colors = {
+                success: 'linear-gradient(to right, #00b09b, #96c93d)',
+                error: 'linear-gradient(to right, #ff5f6d, #ffc371)',
+                info: 'linear-gradient(to right, #4facfe, #00f2fe)',
+                warning: 'linear-gradient(to right, #f093fb, #f5576c)'
+            };
+            
+            Toastify({
+                text: message,
+                duration: 3000,
+                close: true,
+                gravity: "top",
+                position: "right",
+                stopOnFocus: true,
+                style: {
+                    background: colors[type] || colors.info,
+                }
+            }).showToast();
+        }
 
-        // Listen for Livewire events to show toast notifications
+        // Show toast from session flash
+        @if(session('toastify'))
+            showToastify('{{ session('toastify.type') }}', {!! json_encode(session('toastify.message')) !!});
+        @endif
+
+        // Listen for Livewire events
         document.addEventListener('livewire:init', () => {
-            Livewire.on('show-toast', (data) => {
-                // In Livewire 3, data is passed as an object directly
-                let toastData = {};
-                
-                if (data && typeof data === 'object') {
-                    // If it's already an object, use it directly
-                    if (data.type || data.message || data.title) {
-                        toastData = data;
-                    } else if (Array.isArray(data) && data.length > 0) {
-                        // If it's an array, take first element
-                        toastData = data[0];
-                    }
-                }
-                
-                const type = toastData.type || 'info';
-                const message = toastData.message || '';
-                
-                console.log('Toast event received:', { type, message, rawData: data });
-                
-                if (message) {
-                    if (toastr[type] && typeof toastr[type] === 'function') {
-                        // Show toast without title - only message
-                        toastr[type](message);
-                    } else {
-                        toastr.info(message);
-                    }
-                } else {
-                    console.warn('Invalid toast data - missing message:', { type, message });
-                }
+            Livewire.on('toastify', (data) => {
+                showToastify(data[0].type, data[0].message);
             });
         });
 
-        // Show toast from session flash messages on page load
-        @if(session()->has('message'))
-            document.addEventListener('DOMContentLoaded', function() {
-                toastr.success(@json(session('message')), 'Succes!');
-            });
-        @endif
+        // Legacy Livewire 2.x support
+        window.addEventListener('toastify', event => {
+            showToastify(event.detail.type, event.detail.message);
+        });
 
-        @if(session()->has('error'))
-            document.addEventListener('DOMContentLoaded', function() {
-                toastr.error(@json(session('error')), 'Eroare!');
-            });
-        @endif
-        
         // Sidebar toggle for mobile
         document.addEventListener('DOMContentLoaded', function() {
             const sidebarToggle = document.getElementById('topbarToggle');

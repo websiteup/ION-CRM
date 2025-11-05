@@ -34,6 +34,7 @@ class SettingsComponent extends Component
     public $smtp_encryption = 'tls';
     public $smtp_from_name = '';
     public $smtp_from_email = '';
+    public $telegram_bot_token = '';
 
     // Company Settings
     public $company_name = '';
@@ -80,6 +81,7 @@ class SettingsComponent extends Component
         'smtp_encryption' => 'nullable|in:tls,ssl',
         'smtp_from_name' => 'nullable|string|max:255',
         'smtp_from_email' => 'nullable|email|max:255',
+        'telegram_bot_token' => 'nullable|string|max:255',
         // Company
         'company_name' => 'required|string|max:255',
         'company_phone' => 'nullable|string|max:50',
@@ -124,6 +126,7 @@ class SettingsComponent extends Component
         $this->smtp_encryption = $settings->smtp_encryption ?? 'tls';
         $this->smtp_from_name = $settings->smtp_from_name ?? '';
         $this->smtp_from_email = $settings->smtp_from_email ?? '';
+        $this->telegram_bot_token = $settings->telegram_bot_token ?? '';
 
         // Load Company Settings
         $company = Company::getCompany();
@@ -170,6 +173,7 @@ class SettingsComponent extends Component
             'smtp_encryption' => 'nullable|in:tls,ssl',
             'smtp_from_name' => 'nullable|string|max:255',
             'smtp_from_email' => 'nullable|email|max:255',
+            'telegram_bot_token' => 'nullable|string|max:255',
         ]);
 
         $settings = Setting::getSettings();
@@ -184,6 +188,7 @@ class SettingsComponent extends Component
             'smtp_encryption' => $this->smtp_encryption,
             'smtp_from_name' => $this->smtp_from_name,
             'smtp_from_email' => $this->smtp_from_email,
+            'telegram_bot_token' => $this->telegram_bot_token,
         ];
 
         // Only update password if a new one was provided
@@ -202,7 +207,11 @@ class SettingsComponent extends Component
         $settings->update($data);
         $this->app_logo = null; // Reset file input
         $this->smtp_password = ''; // Clear password field
-        session()->flash('message', 'Setări generale actualizate cu succes!');
+        
+        // Clear config cache to apply new settings
+        \Illuminate\Support\Facades\Artisan::call('config:clear');
+        
+        notify()->success('Setări generale actualizate cu succes!');
     }
 
     public function saveCompany()
@@ -237,7 +246,7 @@ class SettingsComponent extends Component
 
         $company->update($data);
         $this->company_logo = null; // Reset file input
-        session()->flash('message', 'Detalii companie actualizate cu succes!');
+        notify()->success('Detalii companie actualizate cu succes!');
     }
 
     public function clearCache()
@@ -245,7 +254,7 @@ class SettingsComponent extends Component
         Artisan::call('cache:clear');
         Artisan::call('config:clear');
         Artisan::call('view:clear');
-        session()->flash('message', 'Cache-ul a fost șters cu succes!');
+        notify()->success('Cache-ul a fost șters cu succes!');
     }
 
     // Tax Rate Methods
@@ -298,10 +307,10 @@ class SettingsComponent extends Component
 
         if ($this->tax_rate_id) {
             TaxRate::findOrFail($this->tax_rate_id)->update($data);
-            session()->flash('message', 'Tax rate actualizat cu succes!');
+            notify()->success('Tax rate actualizat cu succes!');
         } else {
             TaxRate::create($data);
-            session()->flash('message', 'Tax rate adăugat cu succes!');
+            notify()->success('Tax rate adăugat cu succes!');
         }
 
         $this->closeTaxModal();
@@ -310,7 +319,7 @@ class SettingsComponent extends Component
     public function deleteTaxRate($id)
     {
         TaxRate::findOrFail($id)->delete();
-        session()->flash('message', 'Tax rate șters cu succes!');
+        notify()->success('Tax rate șters cu succes!');
     }
 
     // Currency Methods
@@ -371,10 +380,10 @@ class SettingsComponent extends Component
 
         if ($this->currency_id) {
             Currency::findOrFail($this->currency_id)->update($data);
-            session()->flash('message', 'Currency actualizat cu succes!');
+            notify()->success('Currency actualizat cu succes!');
         } else {
             Currency::create($data);
-            session()->flash('message', 'Currency adăugat cu succes!');
+            notify()->success('Currency adăugat cu succes!');
         }
 
         $this->closeCurrencyModal();
@@ -383,7 +392,7 @@ class SettingsComponent extends Component
     public function deleteCurrency($id)
     {
         Currency::findOrFail($id)->delete();
-        session()->flash('message', 'Currency șters cu succes!');
+        notify()->success('Currency șters cu succes!');
     }
 
     // Language Methods
@@ -391,14 +400,14 @@ class SettingsComponent extends Component
     {
         $language = Language::findOrFail($id);
         $language->update(['is_active' => !$language->is_active]);
-        session()->flash('message', 'Status limba actualizat cu succes!');
+        notify()->success('Status limba actualizat cu succes!');
     }
 
     public function setDefaultLanguage($id)
     {
         $language = Language::findOrFail($id);
         $language->update(['is_default' => true]);
-        session()->flash('message', 'Limbă default setată cu succes!');
+        notify()->success('Limbă default setată cu succes!');
     }
 
     public function render()

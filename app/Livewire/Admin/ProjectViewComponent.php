@@ -53,9 +53,9 @@ class ProjectViewComponent extends Component
 
         if (!$this->project->members->contains($this->selectedUserId)) {
             $this->project->members()->attach($this->selectedUserId);
-            session()->flash('message', 'Membru adăugat cu succes!');
+            notify()->success('Membru adăugat cu succes!');
         } else {
-            session()->flash('error', 'Membrul este deja în proiect!');
+            notify()->error('Membrul este deja în proiect!');
         }
 
         $this->selectedUserId = '';
@@ -66,7 +66,7 @@ class ProjectViewComponent extends Component
     public function removeMember($userId)
     {
         $this->project->members()->detach($userId);
-        session()->flash('message', 'Membru șters cu succes!');
+        notify()->success('Membru șters cu succes!');
         $this->loadProject();
     }
 

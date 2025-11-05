@@ -96,7 +96,7 @@ class ClientsComponent extends Component
                 'address' => $this->address,
                 'type' => $this->type,
             ]);
-            session()->flash('message', 'Client actualizat cu succes!');
+            notify()->success('Client actualizat cu succes!');
         } else {
             Client::create([
                 'first_name' => $this->first_name,
@@ -107,7 +107,7 @@ class ClientsComponent extends Component
                 'address' => $this->address,
                 'type' => $this->type,
             ]);
-            session()->flash('message', 'Client adăugat cu succes!');
+            notify()->success('Client adăugat cu succes!');
         }
 
         $this->closeModal();
@@ -116,7 +116,7 @@ class ClientsComponent extends Component
     public function delete($id)
     {
         Client::findOrFail($id)->delete();
-        session()->flash('message', 'Client șters cu succes!');
+        notify()->success('Client șters cu succes!');
     }
 
     public function render()

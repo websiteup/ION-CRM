@@ -77,6 +77,81 @@
                                 <textarea wire:model="email_signature" class="form-control @error('email_signature') is-invalid @enderror" id="email_signature" rows="10"></textarea>
                                 @error('email_signature') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
+                            <hr>
+                            <h6 class="mb-3">Notificări</h6>
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" wire:model="notification_email_enabled" id="notification_email_enabled">
+                                    <label class="form-check-label" for="notification_email_enabled">
+                                        Activează notificări prin Email
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" wire:model="notification_telegram_enabled" id="notification_telegram_enabled">
+                                    <label class="form-check-label" for="notification_telegram_enabled">
+                                        Activează notificări prin Telegram
+                                    </label>
+                                </div>
+                            </div>
+                            <hr>
+                            <h6 class="mb-3">Tipuri de Notificări</h6>
+                            <div class="mb-2">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" wire:model="notification_task_created" id="notification_task_created">
+                                    <label class="form-check-label" for="notification_task_created">
+                                        Task creat
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="mb-2">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" wire:model="notification_task_assigned" id="notification_task_assigned">
+                                    <label class="form-check-label" for="notification_task_assigned">
+                                        Task atribuit
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="mb-2">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" wire:model="notification_task_updated" id="notification_task_updated">
+                                    <label class="form-check-label" for="notification_task_updated">
+                                        Task actualizat
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" wire:model="notification_task_deadline" id="notification_task_deadline">
+                                    <label class="form-check-label" for="notification_task_deadline">
+                                        Deadline aproape
+                                    </label>
+                                </div>
+                            </div>
+                            <hr>
+                            <h6 class="mb-3">Conectare Telegram</h6>
+                            <div class="mb-3">
+                                <label for="telegram_chat_id" class="form-label">Telegram Chat ID</label>
+                                <div class="input-group">
+                                    <input type="text" wire:model="telegram_chat_id" class="form-control @error('telegram_chat_id') is-invalid @enderror" id="telegram_chat_id" placeholder="ID-ul va fi obținut automat" readonly>
+                                    <button type="button" class="btn btn-outline-primary" wire:click="getTelegramChatId">
+                                        <i class="bi bi-telegram"></i> Obține Chat ID
+                                    </button>
+                                </div>
+                                @error('telegram_chat_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                <small class="form-text text-muted">
+                                    Pentru a obține Chat ID-ul, începe o conversație cu bot-ul Telegram și apasă butonul "Obține Chat ID".
+                                    <br>
+                                    <strong>Instrucțiuni:</strong>
+                                    <ol class="small">
+                                        <li>Asigură-te că ai configurat Token-ul Bot în Setări (Admin → Setări → General → Telegram Bot Token)</li>
+                                        <li>Deschide Telegram și căută bot-ul creat cu @BotFather</li>
+                                        <li>Începe o conversație cu bot-ul trimițând comanda /start</li>
+                                        <li>Apasă butonul "Obține Chat ID" de mai sus</li>
+                                    </ol>
+                                </small>
+                            </div>
                             <button type="submit" class="btn btn-primary">Salvează Modificările</button>
                         </form>
                     </div>

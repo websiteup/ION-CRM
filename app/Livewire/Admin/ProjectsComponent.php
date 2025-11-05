@@ -124,7 +124,7 @@ class ProjectsComponent extends Component
             $project = Project::findOrFail($this->projectId);
             $data['updated_by'] = Auth::id();
             $project->update($data);
-            session()->flash('message', 'Proiect actualizat cu succes!');
+            notify()->success('Proiect actualizat cu succes!');
         } else {
             $data['created_by'] = Auth::id();
             $project = Project::create($data);
@@ -132,7 +132,7 @@ class ProjectsComponent extends Component
             // Add creator as project member by default
             $project->members()->attach(Auth::id());
             
-            session()->flash('message', 'Proiect creat cu succes!');
+            notify()->success('Proiect creat cu succes!');
         }
 
         $this->closeModal();
@@ -141,7 +141,7 @@ class ProjectsComponent extends Component
     public function deleteProject($id)
     {
         Project::findOrFail($id)->delete();
-        session()->flash('message', 'Proiect șters cu succes!');
+        notify()->success('Proiect șters cu succes!');
     }
 
     public $newClientFirstName = '';
@@ -183,7 +183,7 @@ class ProjectsComponent extends Component
 
         $this->clientId = $client->id;
         $this->closeClientModal();
-        session()->flash('message', 'Client adăugat cu succes și selectat!');
+        notify()->success('Client adăugat cu succes și selectat!');
     }
 
     public function render()

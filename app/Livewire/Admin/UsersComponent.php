@@ -162,11 +162,11 @@ class UsersComponent extends Component
             }
             $user->update($data);
             $user->roles()->sync($this->selectedRoles);
-            session()->flash('message', 'Utilizator actualizat cu succes!');
+            notify()->success('Utilizator actualizat cu succes!');
         } else {
             $user = User::create($data);
             $user->roles()->sync($this->selectedRoles);
-            session()->flash('message', 'Utilizator adăugat cu succes!');
+            notify()->success('Utilizator adăugat cu succes!');
         }
 
         $this->closeModal();
@@ -183,13 +183,13 @@ class UsersComponent extends Component
             $adminCount = $adminRole ? $adminRole->users()->count() : 0;
             
             if ($adminCount <= 1) {
-                session()->flash('error', 'Nu poți șterge singurul administrator din sistem!');
+                notify()->error('Nu poți șterge singurul administrator din sistem!');
                 return;
             }
             
             // Verificăm dacă utilizatorul încearcă să-și șteargă propriul profil
             if ($user->id === Auth::id()) {
-                session()->flash('error', 'Nu poți șterge propriul profil dacă ești singurul administrator!');
+                notify()->error('Nu poți șterge propriul profil dacă ești singurul administrator!');
                 return;
             }
         }
@@ -198,7 +198,7 @@ class UsersComponent extends Component
             Storage::disk('public')->delete($user->profile_photo);
         }
         $user->delete();
-        session()->flash('message', 'Utilizator șters cu succes!');
+        notify()->success('Utilizator șters cu succes!');
     }
 
     public function render()

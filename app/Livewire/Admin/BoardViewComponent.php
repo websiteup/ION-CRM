@@ -9,6 +9,7 @@ use App\Models\Task;
 use App\Models\Label;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class BoardViewComponent extends Component
@@ -137,25 +138,132 @@ class BoardViewComponent extends Component
 
         if ($this->taskId) {
             $task = Task::findOrFail($this->taskId);
+            $oldAssignedTo = $task->assigned_to;
             $data['updated_by'] = Auth::id();
             $task->update($data);
             $task->labels()->sync($this->taskLabels);
-            $this->dispatch('show-toast', [
-                'type' => 'success',
-                'title' => 'Task actualizat',
-                'message' => 'Task-ul "' . $this->taskTitle . '" a fost actualizat cu succes!'
-            ]);
+            
+            // Reload task with relationships for notifications
+            $task->load(['column.board', 'project', 'assignedUser', 'creator']);
+            
+            // Send notifications for updated task
+            if ($task->assignedUser) {
+                // Reîmprospătează utilizatorul pentru a avea preferințele actualizate
+                $assignedUser = \App\Models\User::find($task->assignedUser->id);
+                $assignedUser->refresh(); // Reîmprospătează pentru a avea preferințele actualizate
+                
+                if ($assignedUser && $assignedUser->notification_task_updated) {
+                    try {
+                        // Actualizăm token-ul din setări înainte de trimitere
+                        $settings = \App\Models\Setting::first();
+                        if ($settings && $settings->telegram_bot_token) {
+                            // Folosim ambele metode pentru a ne asigura că token-ul este setat
+                            config(['services.telegram.bot_token' => $settings->telegram_bot_token]);
+                            \Illuminate\Support\Facades\Config::set('services.telegram.bot_token', $settings->telegram_bot_token);
+                            // Forțăm refresh-ul configurației
+                            \Illuminate\Support\Facades\Config::get('services.telegram.bot_token', $settings->telegram_bot_token);
+                        }
+                        
+                        Log::info("Trimitere notificare 'updated' către utilizator {$assignedUser->id} ({$assignedUser->email})");
+                        Log::info("Token verificat: " . (config('services.telegram.bot_token') ? 'EXISTS (' . substr(config('services.telegram.bot_token'), 0, 10) . '...)' : 'MISSING'));
+                        $assignedUser->notify(new \App\Notifications\TaskUpdatedNotification($task));
+                    } catch (\Exception $e) {
+                        Log::error('Eroare la trimiterea notificării Telegram (updated): ' . $e->getMessage());
+                        Log::error("Stack trace: " . $e->getTraceAsString());
+                    }
+                }
+            }
+            
+            // If task was assigned to a new user, send assignment notification
+            if ($this->taskAssignedTo && $this->taskAssignedTo != $oldAssignedTo) {
+                $assignedUser = \App\Models\User::find($this->taskAssignedTo);
+                $assignedUser->refresh(); // Reîmprospătează pentru a avea preferințele actualizate
+                
+                if ($assignedUser && $assignedUser->notification_task_assigned) {
+                    try {
+                        // Actualizăm token-ul din setări înainte de trimitere
+                        $settings = \App\Models\Setting::first();
+                        if ($settings && $settings->telegram_bot_token) {
+                            // Folosim ambele metode pentru a ne asigura că token-ul este setat
+                            config(['services.telegram.bot_token' => $settings->telegram_bot_token]);
+                            \Illuminate\Support\Facades\Config::set('services.telegram.bot_token', $settings->telegram_bot_token);
+                        }
+                        
+                        Log::info("Trimitere notificare 'assigned' către utilizator {$assignedUser->id} ({$assignedUser->email})");
+                        $assignedUser->notify(new \App\Notifications\TaskAssignedNotification($task));
+                    } catch (\Exception $e) {
+                        Log::error('Eroare la trimiterea notificării Telegram (assigned): ' . $e->getMessage());
+                        Log::error("Stack trace: " . $e->getTraceAsString());
+                    }
+                }
+            }
+            
+            notify()->success('Task-ul "' . $this->taskTitle . '" a fost actualizat cu succes!');
         } else {
             $data['created_by'] = Auth::id();
             $task = Task::create($data);
             $task->labels()->sync($this->taskLabels);
+            
+            // Reload task with relationships for notifications
+            $task->load(['column.board', 'project', 'assignedUser', 'creator']);
+            
+            // Send notifications for created task
+            $usersToNotify = [];
+            
+            // Adaugă utilizatorul atribuit dacă există
+            if ($task->assignedUser) {
+                $assignedUser = \App\Models\User::find($task->assignedUser->id);
+                if ($assignedUser) {
+                    $usersToNotify[] = [
+                        'user' => $assignedUser,
+                        'notifications' => ['created', 'assigned']
+                    ];
+                }
+            }
+            
+            // Adaugă creatorul dacă este diferit de utilizatorul atribuit
+            if ($task->creator) {
+                $creator = \App\Models\User::find($task->creator->id);
+                if ($creator && (!$task->assignedUser || $creator->id != $task->assignedUser->id)) {
+                    $usersToNotify[] = [
+                        'user' => $creator,
+                        'notifications' => ['created']
+                    ];
+                }
+            }
+            
+            // Trimite notificările
+            foreach ($usersToNotify as $item) {
+                $user = $item['user'];
+                $user->refresh(); // Reîmprospătează pentru a avea preferințele actualizate
+                
+                foreach ($item['notifications'] as $notificationType) {
+                    try {
+                        // Actualizăm token-ul din setări înainte de trimitere
+                        $settings = \App\Models\Setting::first();
+                        if ($settings && $settings->telegram_bot_token) {
+                            // Folosim ambele metode pentru a ne asigura că token-ul este setat
+                            config(['services.telegram.bot_token' => $settings->telegram_bot_token]);
+                            \Illuminate\Support\Facades\Config::set('services.telegram.bot_token', $settings->telegram_bot_token);
+                        }
+                        
+                        if ($notificationType === 'created' && $user->notification_task_created) {
+                            Log::info("Trimitere notificare 'created' către utilizator {$user->id} ({$user->email})");
+                            $user->notify(new \App\Notifications\TaskCreatedNotification($task));
+                        } elseif ($notificationType === 'assigned' && $user->notification_task_assigned) {
+                            Log::info("Trimitere notificare 'assigned' către utilizator {$user->id} ({$user->email})");
+                            $user->notify(new \App\Notifications\TaskAssignedNotification($task));
+                        }
+                    } catch (\Exception $e) {
+                        Log::error("Eroare la trimiterea notificării Telegram ({$notificationType}) către utilizator {$user->id}: " . $e->getMessage());
+                        Log::error("Stack trace: " . $e->getTraceAsString());
+                    }
+                }
+            }
+            
             $column = BoardColumn::find($this->taskColumnId);
             $columnName = $column ? $column->name : 'coloana selectată';
-            $this->dispatch('show-toast', [
-                'type' => 'success',
-                'title' => 'Task creat',
-                'message' => 'Task-ul "' . $this->taskTitle . '" a fost creat cu succes în coloana "' . $columnName . '"!'
-            ]);
+            notify()->success('Task-ul "' . $this->taskTitle . '" a fost creat cu succes în coloana "' . $columnName . '"!');
         }
 
         $this->closeTaskModal();
@@ -167,11 +275,7 @@ class BoardViewComponent extends Component
         $task = Task::findOrFail($id);
         $taskTitle = $task->title;
         $task->delete();
-        $this->dispatch('show-toast', [
-            'type' => 'success',
-            'title' => 'Task șters',
-            'message' => 'Task-ul "' . $taskTitle . '" a fost șters cu succes!'
-        ]);
+        notify()->success('Task-ul "' . $taskTitle . '" a fost șters cu succes!');
         $this->loadBoard();
     }
 
@@ -239,11 +343,7 @@ class BoardViewComponent extends Component
         
         $this->loadBoard();
         $this->dispatch('column-position-updated');
-        $this->dispatch('show-toast', [
-            'type' => 'success',
-            'title' => 'Ordine coloane actualizată',
-            'message' => 'Ordinea coloanelor a fost actualizată cu succes!'
-        ]);
+        notify()->success('Ordinea coloanelor a fost actualizată cu succes!');
     }
 
     public function openColumnModal($columnId = null)
@@ -286,11 +386,7 @@ class BoardViewComponent extends Component
                 'name' => $this->columnName,
                 'color' => $this->columnColor,
             ]);
-            $this->dispatch('show-toast', [
-                'type' => 'success',
-                'title' => 'Coloană actualizată',
-                'message' => 'Coloana "' . $this->columnName . '" a fost actualizată cu succes!'
-            ]);
+            notify()->success('Coloana "' . $this->columnName . '" a fost actualizată cu succes!');
         } else {
             $maxPosition = BoardColumn::where('board_id', $this->boardId)->max('position') ?? 0;
             BoardColumn::create([
@@ -299,11 +395,7 @@ class BoardViewComponent extends Component
                 'color' => $this->columnColor,
                 'position' => $maxPosition + 1,
             ]);
-            $this->dispatch('show-toast', [
-                'type' => 'success',
-                'title' => 'Coloană creată',
-                'message' => 'Coloana "' . $this->columnName . '" a fost creată cu succes în board!'
-            ]);
+            notify()->success('Coloana "' . $this->columnName . '" a fost creată cu succes în board!');
         }
 
         $this->closeColumnModal();
@@ -318,19 +410,11 @@ class BoardViewComponent extends Component
         $taskCount = $column->tasks()->count();
         
         if ($taskCount > 0) {
-            $this->dispatch('show-toast', [
-                'type' => 'error',
-                'title' => 'Ștergere imposibilă',
-                'message' => 'Nu poți șterge coloana "' . $columnName . '" deoarece conține ' . $taskCount . ' task-uri. Mută sau șterge task-urile înainte!'
-            ]);
+            notify()->error('Nu poți șterge coloana "' . $columnName . '" deoarece conține ' . $taskCount . ' task-uri. Mută sau șterge task-urile înainte!');
             return;
         }
         $column->delete();
-        $this->dispatch('show-toast', [
-            'type' => 'success',
-            'title' => 'Coloană ștearsă',
-            'message' => 'Coloana "' . $columnName . '" a fost ștearsă cu succes din board!'
-        ]);
+        notify()->success('Coloana "' . $columnName . '" a fost ștearsă cu succes din board!');
         $this->loadBoard();
         $this->dispatch('column-deleted');
     }
@@ -363,11 +447,7 @@ class BoardViewComponent extends Component
         $this->editingColumnName = '';
         $this->loadBoard();
         $this->dispatch('column-name-updated');
-        $this->dispatch('show-toast', [
-            'type' => 'success',
-            'title' => 'Nume coloană actualizat',
-            'message' => 'Numele coloanei a fost schimbat de la "' . $oldName . '" la "' . $this->editingColumnName . '"!'
-        ]);
+        notify()->success('Numele coloanei a fost schimbat de la "' . $oldName . '" la "' . $this->editingColumnName . '"!');
     }
 
     // Share Modal Methods
@@ -405,22 +485,14 @@ class BoardViewComponent extends Component
 
         // Check if user is already a member
         if ($this->board->members->contains($user->id)) {
-            $this->dispatch('show-toast', [
-                'type' => 'error',
-                'title' => 'Membru deja existent',
-                'message' => 'Utilizatorul "' . $user->first_name . ' ' . $user->last_name . '" (' . $user->email . ') este deja membru al acestui board!'
-            ]);
+            notify()->error('Utilizatorul "' . $user->first_name . ' ' . $user->last_name . '" (' . $user->email . ') este deja membru al acestui board!');
             return;
         }
 
         // Add member
         $roleLabel = $this->inviteRole === 'admin' ? 'Administrator' : ($this->inviteRole === 'viewer' ? 'Viewer' : 'Membru');
         $this->board->members()->attach($user->id, ['role' => $this->inviteRole]);
-        $this->dispatch('show-toast', [
-            'type' => 'success',
-            'title' => 'Membru adăugat',
-            'message' => 'Utilizatorul "' . $user->first_name . ' ' . $user->last_name . '" a fost adăugat ca ' . strtolower($roleLabel) . ' în board!'
-        ]);
+        notify()->success('Utilizatorul "' . $user->first_name . ' ' . $user->last_name . '" a fost adăugat ca ' . strtolower($roleLabel) . ' în board!');
         
         $this->shareEmail = '';
         $this->loadBoard();
@@ -439,11 +511,7 @@ class BoardViewComponent extends Component
         if ($userId == Auth::id() && $role !== 'admin') {
             $adminCount = $this->board->members()->wherePivot('role', 'admin')->count();
             if ($adminCount <= 1) {
-                $this->dispatch('show-toast', [
-                    'type' => 'error',
-                    'title' => 'Schimbare rol imposibilă',
-                    'message' => 'Nu poți schimba propriul rol deoarece ești ultimul administrator al board-ului!'
-                ]);
+                notify()->error('Nu poți schimba propriul rol deoarece ești ultimul administrator al board-ului!');
                 $this->loadBoard();
                 return;
             }
@@ -451,11 +519,7 @@ class BoardViewComponent extends Component
 
         $oldRole = $this->board->members()->wherePivot('user_id', $userId)->first()->pivot->role ?? 'member';
         $this->board->members()->updateExistingPivot($userId, ['role' => $role]);
-        $this->dispatch('show-toast', [
-            'type' => 'success',
-            'title' => 'Rol actualizat',
-            'message' => 'Rolul utilizatorului "' . $user->first_name . ' ' . $user->last_name . '" a fost schimbat de la "' . ($roleLabels[$oldRole] ?? $oldRole) . '" la "' . ($roleLabels[$role] ?? $role) . '"!'
-        ]);
+        notify()->success('Rolul utilizatorului "' . $user->first_name . ' ' . $user->last_name . '" a fost schimbat de la "' . ($roleLabels[$oldRole] ?? $oldRole) . '" la "' . ($roleLabels[$role] ?? $role) . '"!');
         $this->loadBoard();
     }
 
@@ -468,21 +532,13 @@ class BoardViewComponent extends Component
         if ($userId == Auth::id()) {
             $adminMembers = $this->board->members()->wherePivot('role', 'admin')->count();
             if ($adminMembers <= 1) {
-                $this->dispatch('show-toast', [
-                    'type' => 'error',
-                    'title' => 'Ștergere imposibilă',
-                    'message' => 'Nu poți șterge propriul cont deoarece ești ultimul administrator al board-ului!'
-                ]);
+                notify()->error('Nu poți șterge propriul cont deoarece ești ultimul administrator al board-ului!');
                 return;
             }
         }
 
         $this->board->members()->detach($userId);
-        $this->dispatch('show-toast', [
-            'type' => 'success',
-            'title' => 'Membru eliminat',
-            'message' => 'Utilizatorul "' . $userName . '" a fost eliminat din board!'
-        ]);
+        notify()->success('Utilizatorul "' . $userName . '" a fost eliminat din board!');
         $this->loadBoard();
     }
 
@@ -505,38 +561,22 @@ class BoardViewComponent extends Component
         $this->loadBoard();
         
         if ($isPublic) {
-            $this->dispatch('show-toast', [
-                'type' => 'success',
-                'title' => 'Board public activat',
-                'message' => 'Board-ul "' . $this->board->name . '" este acum public! Poți partaja link-ul pentru acces.'
-            ]);
+            notify()->success('Board-ul "' . $this->board->name . '" este acum public! Poți partaja link-ul pentru acces.');
         } else {
-            $this->dispatch('show-toast', [
-                'type' => 'info',
-                'title' => 'Board privat',
-                'message' => 'Board-ul "' . $this->board->name . '" este acum privat. Doar membrii pot accesa board-ul.'
-            ]);
+            notify()->info('Board-ul "' . $this->board->name . '" este acum privat. Doar membrii pot accesa board-ul.');
         }
     }
 
     public function copyPublicLink()
     {
         if (!$this->board->is_public || !$this->board->public_hash) {
-            $this->dispatch('show-toast', [
-                'type' => 'error',
-                'title' => 'Link indisponibil',
-                'message' => 'Board-ul nu este public sau nu are link generat. Activează opțiunea "Board public" mai întâi!'
-            ]);
+            notify()->error('Board-ul nu este public sau nu are link generat. Activează opțiunea "Board public" mai întâi!');
             return;
         }
         
         $url = route('public.board', $this->board->public_hash);
         $this->dispatch('copy-to-clipboard', url: $url);
-        $this->dispatch('show-toast', [
-            'type' => 'success',
-            'title' => 'Link copiat',
-            'message' => 'Link-ul public al board-ului "' . $this->board->name . '" a fost copiat în clipboard! Poți să-l partajezi acum.'
-        ]);
+        notify()->success('Link-ul public al board-ului "' . $this->board->name . '" a fost copiat în clipboard! Poți să-l partajezi acum.');
     }
 
     public function deletePublicLink()
@@ -545,11 +585,7 @@ class BoardViewComponent extends Component
         $this->board->public_hash = null;
         $this->board->save();
         $this->loadBoard();
-        $this->dispatch('show-toast', [
-            'type' => 'info',
-            'title' => 'Link public șters',
-            'message' => 'Link-ul public al board-ului "' . $this->board->name . '" a fost șters. Board-ul este acum privat.'
-        ]);
+        notify()->info('Link-ul public al board-ului "' . $this->board->name . '" a fost șters. Board-ul este acum privat.');
     }
 
     public function updateLinkPermissions($permissions)

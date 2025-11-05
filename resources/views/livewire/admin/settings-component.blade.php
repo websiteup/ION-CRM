@@ -144,6 +144,14 @@
                                 <input type="email" wire:model="smtp_from_email" class="form-control @error('smtp_from_email') is-invalid @enderror" id="smtp_from_email">
                                 @error('smtp_from_email') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
+                            <hr>
+                            <h6 class="mb-3">Setări Telegram</h6>
+                            <div class="mb-3">
+                                <label for="telegram_bot_token" class="form-label">Telegram Bot Token</label>
+                                <input type="text" wire:model="telegram_bot_token" class="form-control @error('telegram_bot_token') is-invalid @enderror" id="telegram_bot_token" placeholder="Obține token-ul de la @BotFather pe Telegram">
+                                @error('telegram_bot_token') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                <small class="form-text text-muted">Obține token-ul creând un bot nou folosind @BotFather pe Telegram.</small>
+                            </div>
                             <div class="d-flex justify-content-between">
                                 <button type="button" wire:click="clearCache" class="btn btn-warning">
                                     <i class="bi bi-trash"></i> Clear Cache

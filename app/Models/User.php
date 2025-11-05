@@ -27,6 +27,13 @@ class User extends Authenticatable
         'password',
         'profile_photo',
         'email_signature',
+        'telegram_chat_id',
+        'notification_email_enabled',
+        'notification_telegram_enabled',
+        'notification_task_created',
+        'notification_task_assigned',
+        'notification_task_updated',
+        'notification_task_deadline',
     ];
 
     /**
@@ -49,6 +56,12 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'notification_email_enabled' => 'boolean',
+            'notification_telegram_enabled' => 'boolean',
+            'notification_task_created' => 'boolean',
+            'notification_task_assigned' => 'boolean',
+            'notification_task_updated' => 'boolean',
+            'notification_task_deadline' => 'boolean',
         ];
     }
 
@@ -75,5 +88,16 @@ class User extends Authenticatable
         }
         
         return $this->roles->contains('id', $role);
+    }
+
+    /**
+     * Route notifications for the Telegram channel.
+     *
+     * @param  \Illuminate\Notifications\Notification  $notification
+     * @return string
+     */
+    public function routeNotificationForTelegram($notification)
+    {
+        return $this->telegram_chat_id;
     }
 }

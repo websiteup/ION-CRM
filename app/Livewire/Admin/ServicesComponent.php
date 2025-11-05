@@ -104,11 +104,11 @@ class ServicesComponent extends Component
             }
             $data['updated_by'] = Auth::id();
             $service->update($data);
-            session()->flash('message', 'Serviciu actualizat cu succes!');
+            notify()->success('Serviciu actualizat cu succes!');
         } else {
             $data['created_by'] = Auth::id();
             Service::create($data);
-            session()->flash('message', 'Serviciu adăugat cu succes!');
+            notify()->success('Serviciu adăugat cu succes!');
         }
 
         $this->closeModal();
@@ -121,7 +121,7 @@ class ServicesComponent extends Component
             Storage::disk('public')->delete($service->photo);
         }
         $service->delete();
-        session()->flash('message', 'Serviciu șters cu succes!');
+        notify()->success('Serviciu șters cu succes!');
     }
 
     public function render()

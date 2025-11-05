@@ -696,7 +696,7 @@
                     // Toast notification is already shown via Livewire event
                 }).catch(err => {
                     console.error('Failed to copy:', err);
-                    toastr.error('Nu s-a putut copia link-ul în clipboard!', 'Eroare!');
+                    // Error handling pentru clipboard - se va afișa automat prin Laravel Notify
                 });
             }
         });
