@@ -272,7 +272,7 @@ Acest proiect este licențiat sub MIT License - vezi fișierul `LICENSE` pentru 
 
 ## 👨‍💻 Autor
 
-ION CRM - Dezvoltat pentru management eficient al relațiilor cu clienții
+Petre Paul Dragos (websiteup.ro)
 
 ## 📞 Suport
 

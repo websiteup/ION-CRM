@@ -36,5 +36,10 @@ class DatabaseSeeder extends Seeder
         if ($adminRole) {
             $user->roles()->attach($adminRole->id);
         }
+
+        // Rulează ProposalTemplateSeeder după crearea user-ului
+        $this->call([
+            ProposalTemplateSeeder::class,
+        ]);
     }
 }

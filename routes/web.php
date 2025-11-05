@@ -13,6 +13,9 @@ use App\Livewire\Admin\BoardViewComponent;
 use App\Livewire\Public\PublicBoardComponent;
 use App\Livewire\Admin\ProjectsComponent;
 use App\Livewire\Admin\ProjectViewComponent;
+use App\Livewire\Admin\ProposalsComponent;
+use App\Livewire\Admin\ProposalViewComponent;
+use App\Livewire\Admin\ProposalTemplatesComponent;
 
 Route::get('/', function () {
     return view('welcome');
@@ -33,6 +36,13 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/admin/services', ServicesComponent::class)->name('admin.services.index');
         Route::get('/admin/users', UsersComponent::class)->name('admin.users.index');
         Route::get('/admin/settings', SettingsComponent::class)->name('admin.settings.index');
+        
+        // Proposals routes
+        Route::get('/admin/proposals', ProposalsComponent::class)->name('admin.proposals.index');
+        Route::get('/admin/proposals/create', ProposalViewComponent::class)->name('admin.proposals.create');
+        Route::get('/admin/proposals/templates', ProposalTemplatesComponent::class)->name('admin.proposals.templates');
+        Route::get('/admin/proposals/{id}/pdf', [App\Http\Controllers\ProposalController::class, 'pdf'])->name('admin.proposals.pdf');
+        Route::get('/admin/proposals/{id}', ProposalViewComponent::class)->name('admin.proposals.view');
     });
 
     // Board routes - pentru admin și manager

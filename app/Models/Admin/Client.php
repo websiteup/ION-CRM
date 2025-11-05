@@ -10,6 +10,12 @@ class Client extends Model
     use HasFactory;
 
     protected $fillable = ['type', 'first_name', 'last_name', 'email', 'phone', 'country', 'address'];
-    // Definirea relațiilor cu alte modele (de exemplu, Proposals)
 
+    /**
+     * Get the proposals for this client.
+     */
+    public function proposals()
+    {
+        return $this->hasMany(\App\Models\Proposal::class);
+    }
 }

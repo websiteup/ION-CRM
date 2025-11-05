@@ -63,6 +63,14 @@
                             <i class="bi bi-gear"></i>
                             <span>Setări</span>
                         </a>
+                        <a href="{{ route('admin.proposals.index') }}" class="sidebar-link {{ request()->routeIs('admin.proposals.*') ? 'active' : '' }}">
+                            <i class="bi bi-file-earmark-text"></i>
+                            <span>Oferte</span>
+                        </a>
+                        <a href="{{ route('admin.proposals.templates') }}" class="sidebar-link {{ request()->routeIs('admin.proposals.templates') ? 'active' : '' }}">
+                            <i class="bi bi-file-earmark-medical"></i>
+                            <span>Template-uri Oferte</span>
+                        </a>
                     @endif
                     
                     @if(Auth::user()->hasRole('admin') || Auth::user()->hasRole('manager'))
