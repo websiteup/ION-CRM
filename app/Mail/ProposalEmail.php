@@ -39,6 +39,11 @@ class ProposalEmail extends Mailable
                 'proposal' => $proposal,
                 'content' => $this->getProcessedContent($proposal),
             ]);
+        
+        // Add proposal data to event for logging
+        $view->with([
+            'proposal' => $proposal,
+        ]);
 
         // TODO: Add PDF attachment when PDF generation is implemented
         // $view->attachData($this->generatePdf($proposal), 'proposal-' . $proposal->proposal_number . '.pdf', [

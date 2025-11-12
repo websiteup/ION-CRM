@@ -7,6 +7,9 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Notifications\ChannelManager;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Mail\Events\MessageSent;
+use App\Listeners\LogSentEmail;
 use NotificationChannels\Telegram\TelegramChannel;
 
 class AppServiceProvider extends ServiceProvider
@@ -33,6 +36,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Register event listeners
+        Event::listen(
+            MessageSent::class,
+            LogSentEmail::class
+        );
+
         // Configure Telegram bot token from settings - Aici baza de date este disponibilă
         try {
             $settings = Setting::first();

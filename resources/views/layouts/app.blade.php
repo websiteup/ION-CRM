@@ -59,14 +59,18 @@
                             <i class="bi bi-person-badge"></i>
                             <span>Utilizatori</span>
                         </a>
-                        <a href="{{ route('admin.settings.index') }}" class="sidebar-link {{ request()->routeIs('admin.settings.*') ? 'active' : '' }}">
-                            <i class="bi bi-gear"></i>
-                            <span>Setări</span>
-                        </a>
-                        <a href="{{ route('admin.proposals.index') }}" class="sidebar-link {{ request()->routeIs('admin.proposals.*') ? 'active' : '' }}">
-                            <i class="bi bi-file-earmark-text"></i>
-                            <span>Oferte</span>
-                        </a>
+                    <a href="{{ route('admin.settings.index') }}" class="sidebar-link {{ request()->routeIs('admin.settings.*') ? 'active' : '' }}">
+                        <i class="bi bi-gear"></i>
+                        <span>Setări</span>
+                    </a>
+                    <a href="{{ route('admin.emails.index') }}" class="sidebar-link {{ request()->routeIs('admin.emails.*') ? 'active' : '' }}">
+                        <i class="bi bi-envelope-check"></i>
+                        <span>Log Email-uri</span>
+                    </a>
+                    <a href="{{ route('admin.proposals.index') }}" class="sidebar-link {{ request()->routeIs('admin.proposals.*') ? 'active' : '' }}">
+                        <i class="bi bi-file-earmark-text"></i>
+                        <span>Oferte</span>
+                    </a>
                         <a href="{{ route('admin.proposals.templates') }}" class="sidebar-link {{ request()->routeIs('admin.proposals.templates') ? 'active' : '' }}">
                             <i class="bi bi-file-earmark-medical"></i>
                             <span>Template-uri Oferte</span>

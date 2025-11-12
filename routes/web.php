@@ -16,6 +16,7 @@ use App\Livewire\Admin\ProjectViewComponent;
 use App\Livewire\Admin\ProposalsComponent;
 use App\Livewire\Admin\ProposalViewComponent;
 use App\Livewire\Admin\ProposalTemplatesComponent;
+use App\Livewire\Admin\SentEmailsComponent;
 
 Route::get('/', function () {
     return view('welcome');
@@ -36,6 +37,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/admin/services', ServicesComponent::class)->name('admin.services.index');
         Route::get('/admin/users', UsersComponent::class)->name('admin.users.index');
         Route::get('/admin/settings', SettingsComponent::class)->name('admin.settings.index');
+        Route::get('/admin/emails', SentEmailsComponent::class)->name('admin.emails.index');
         
         // Proposals routes
         Route::get('/admin/proposals', ProposalsComponent::class)->name('admin.proposals.index');

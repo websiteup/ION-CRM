@@ -38,6 +38,11 @@
                     <i class="bi bi-translate"></i> Limbi
                 </button>
             </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link {{ $activeTab === 'email' ? 'active' : '' }}" wire:click="switchTab('email')" type="button">
+                    <i class="bi bi-envelope"></i> Email
+                </button>
+            </li>
         </ul>
 
         <!-- Tab Content -->
@@ -99,52 +104,6 @@
                                 @endif
                             </div>
                             <hr>
-                            <h6 class="mb-3">Setări SMTP Email</h6>
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="smtp_host" class="form-label">SMTP Host</label>
-                                    <input type="text" wire:model="smtp_host" class="form-control @error('smtp_host') is-invalid @enderror" id="smtp_host" placeholder="smtp.example.com">
-                                    @error('smtp_host') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="smtp_port" class="form-label">SMTP Port</label>
-                                    <input type="number" wire:model="smtp_port" class="form-control @error('smtp_port') is-invalid @enderror" id="smtp_port" placeholder="587">
-                                    @error('smtp_port') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="smtp_username" class="form-label">SMTP Username</label>
-                                    <input type="text" wire:model="smtp_username" class="form-control @error('smtp_username') is-invalid @enderror" id="smtp_username">
-                                    @error('smtp_username') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="smtp_password" class="form-label">SMTP Password (lasă gol pentru a nu schimba)</label>
-                                    <input type="password" wire:model="smtp_password" class="form-control @error('smtp_password') is-invalid @enderror" id="smtp_password">
-                                    @error('smtp_password') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="smtp_encryption" class="form-label">Encryption</label>
-                                    <select wire:model="smtp_encryption" class="form-select @error('smtp_encryption') is-invalid @enderror" id="smtp_encryption">
-                                        <option value="tls">TLS</option>
-                                        <option value="ssl">SSL</option>
-                                    </select>
-                                    @error('smtp_encryption') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="smtp_from_name" class="form-label">From Name</label>
-                                    <input type="text" wire:model="smtp_from_name" class="form-control @error('smtp_from_name') is-invalid @enderror" id="smtp_from_name">
-                                    @error('smtp_from_name') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                                </div>
-                            </div>
-                            <div class="mb-3">
-                                <label for="smtp_from_email" class="form-label">From Email</label>
-                                <input type="email" wire:model="smtp_from_email" class="form-control @error('smtp_from_email') is-invalid @enderror" id="smtp_from_email">
-                                @error('smtp_from_email') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                            </div>
-                            <hr>
                             <h6 class="mb-3">Setări Telegram</h6>
                             <div class="mb-3">
                                 <label for="telegram_bot_token" class="form-label">Telegram Bot Token</label>
@@ -158,6 +117,104 @@
                                 </button>
                                 <button type="button" wire:click="saveGeneral" class="btn btn-primary">
                                     <i class="bi bi-save"></i> Salvează
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            @endif
+
+            <!-- Email Tab -->
+            @if($activeTab === 'email')
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Setări Email SMTP</h5>
+                    </div>
+                    <div class="card-body">
+                        <form wire:submit.prevent="saveEmail">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="smtp_host" class="form-label">SMTP Host *</label>
+                                    <input type="text" wire:model.live="smtp_host" class="form-control @error('smtp_host') is-invalid @enderror" id="smtp_host" placeholder="smtp.example.com">
+                                    @error('smtp_host') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                    <small class="form-text text-muted">Ex: smtp.gmail.com, smtp.mailtrap.io</small>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="smtp_port" class="form-label">SMTP Port *</label>
+                                    <input type="number" wire:model.live="smtp_port" class="form-control @error('smtp_port') is-invalid @enderror" id="smtp_port" placeholder="587">
+                                    @error('smtp_port') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                    <small class="form-text text-muted">Porturi comune: 587 (TLS), 465 (SSL), 2525</small>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="smtp_username" class="form-label">SMTP Username</label>
+                                    <input type="text" wire:model="smtp_username" class="form-control @error('smtp_username') is-invalid @enderror" id="smtp_username" placeholder="username@example.com">
+                                    @error('smtp_username') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="smtp_password" class="form-label">SMTP Password</label>
+                                    <input type="password" wire:model="smtp_password" class="form-control @error('smtp_password') is-invalid @enderror" id="smtp_password" placeholder="Lasă gol pentru a nu schimba">
+                                    @error('smtp_password') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                    <small class="form-text text-muted">Lasă gol dacă nu vrei să schimbi parola existentă</small>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="smtp_encryption" class="form-label">Encryption *</label>
+                                    <select wire:model="smtp_encryption" class="form-select @error('smtp_encryption') is-invalid @enderror" id="smtp_encryption">
+                                        <option value="">None</option>
+                                        <option value="tls">TLS</option>
+                                        <option value="ssl">SSL</option>
+                                    </select>
+                                    @error('smtp_encryption') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="smtp_from_name" class="form-label">From Name</label>
+                                    <input type="text" wire:model="smtp_from_name" class="form-control @error('smtp_from_name') is-invalid @enderror" id="smtp_from_name" placeholder="ION CRM">
+                                    @error('smtp_from_name') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="smtp_from_email" class="form-label">From Email *</label>
+                                <input type="email" wire:model.live="smtp_from_email" class="form-control @error('smtp_from_email') is-invalid @enderror" id="smtp_from_email" placeholder="noreply@example.com">
+                                @error('smtp_from_email') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                <small class="form-text text-muted">Adresa de email de la care vor fi trimise email-urile</small>
+                            </div>
+                            <hr>
+                            <h6 class="mb-3">Testare Email</h6>
+                            <div class="mb-3">
+                                <label for="test_email" class="form-label">Email de Test</label>
+                                <input type="email" wire:model.live="test_email" class="form-control" id="test_email" placeholder="test@example.com">
+                                <small class="form-text text-muted">Adresa de email la care vei primi email-ul de test</small>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                @php
+                                    $canTest = !empty($smtp_host) && !empty($smtp_from_email) && !empty($test_email);
+                                @endphp
+                                @if(!$canTest)
+                                    <button type="button" class="btn btn-info" disabled>
+                                        <i class="bi bi-send"></i> Testează Email
+                                        <small class="d-block text-muted">
+                                            @if(empty($smtp_host) || empty($smtp_from_email))
+                                                Completează SMTP Host și From Email pentru a testa
+                                            @elseif(empty($test_email))
+                                                Completează email-ul de test
+                                            @endif
+                                        </small>
+                                    </button>
+                                @else
+                                    <button type="button" wire:click="testEmail" wire:loading.attr="disabled" class="btn btn-info">
+                                        <span wire:loading.remove wire:target="testEmail">
+                                            <i class="bi bi-send"></i> Testează Email
+                                        </span>
+                                        <span wire:loading wire:target="testEmail">
+                                            <span class="spinner-border spinner-border-sm" role="status"></span> Se trimite...
+                                        </span>
+                                    </button>
+                                @endif
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-save"></i> Salvează Setări Email
                                 </button>
                             </div>
                         </form>

@@ -12,6 +12,8 @@ use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Config;
 
 class SettingsComponent extends Component
 {
@@ -35,6 +37,7 @@ class SettingsComponent extends Component
     public $smtp_from_name = '';
     public $smtp_from_email = '';
     public $telegram_bot_token = '';
+    public $test_email = '';
 
     // Company Settings
     public $company_name = '';
@@ -78,7 +81,7 @@ class SettingsComponent extends Component
         'smtp_port' => 'nullable|integer|min:1|max:65535',
         'smtp_username' => 'nullable|string|max:255',
         'smtp_password' => 'nullable|string|max:255',
-        'smtp_encryption' => 'nullable|in:tls,ssl',
+        'smtp_encryption' => 'nullable|in:tls,ssl,',
         'smtp_from_name' => 'nullable|string|max:255',
         'smtp_from_email' => 'nullable|email|max:255',
         'telegram_bot_token' => 'nullable|string|max:255',
@@ -126,6 +129,7 @@ class SettingsComponent extends Component
         $this->smtp_encryption = $settings->smtp_encryption ?? 'tls';
         $this->smtp_from_name = $settings->smtp_from_name ?? '';
         $this->smtp_from_email = $settings->smtp_from_email ?? '';
+        $this->test_email = $settings->smtp_test_email ?? '';
         $this->telegram_bot_token = $settings->telegram_bot_token ?? '';
 
         // Load Company Settings
@@ -166,13 +170,6 @@ class SettingsComponent extends Component
             'timezone' => 'required|string|max:100',
             'date_format' => 'required|string|max:20',
             'app_logo' => 'nullable|image|max:2048',
-            'smtp_host' => 'nullable|string|max:255',
-            'smtp_port' => 'nullable|integer|min:1|max:65535',
-            'smtp_username' => 'nullable|string|max:255',
-            'smtp_password' => 'nullable|string|max:255',
-            'smtp_encryption' => 'nullable|in:tls,ssl',
-            'smtp_from_name' => 'nullable|string|max:255',
-            'smtp_from_email' => 'nullable|email|max:255',
             'telegram_bot_token' => 'nullable|string|max:255',
         ]);
 
@@ -182,19 +179,8 @@ class SettingsComponent extends Component
             'default_language' => $this->default_language,
             'timezone' => $this->timezone,
             'date_format' => $this->date_format,
-            'smtp_host' => $this->smtp_host,
-            'smtp_port' => $this->smtp_port,
-            'smtp_username' => $this->smtp_username,
-            'smtp_encryption' => $this->smtp_encryption,
-            'smtp_from_name' => $this->smtp_from_name,
-            'smtp_from_email' => $this->smtp_from_email,
             'telegram_bot_token' => $this->telegram_bot_token,
         ];
-
-        // Only update password if a new one was provided
-        if (!empty($this->smtp_password)) {
-            $data['smtp_password'] = $this->smtp_password;
-        }
 
         if ($this->app_logo) {
             if ($settings->app_logo) {
@@ -206,12 +192,117 @@ class SettingsComponent extends Component
 
         $settings->update($data);
         $this->app_logo = null; // Reset file input
-        $this->smtp_password = ''; // Clear password field
         
         // Clear config cache to apply new settings
         \Illuminate\Support\Facades\Artisan::call('config:clear');
         
         notify()->success('Setări generale actualizate cu succes!');
+    }
+
+    public function saveEmail()
+    {
+        $this->validate([
+            'smtp_host' => 'nullable|string|max:255',
+            'smtp_port' => 'nullable|integer|min:1|max:65535',
+            'smtp_username' => 'nullable|string|max:255',
+            'smtp_password' => 'nullable|string|max:255',
+            'smtp_encryption' => 'nullable|in:tls,ssl,',
+            'smtp_from_name' => 'nullable|string|max:255',
+            'smtp_from_email' => 'nullable|email|max:255',
+        ]);
+
+        $settings = Setting::getSettings();
+        $data = [
+            'smtp_host' => $this->smtp_host,
+            'smtp_port' => $this->smtp_port,
+            'smtp_username' => $this->smtp_username,
+            'smtp_encryption' => $this->smtp_encryption,
+            'smtp_from_name' => $this->smtp_from_name,
+            'smtp_from_email' => $this->smtp_from_email,
+            'smtp_test_email' => $this->test_email,
+        ];
+
+        // Only update password if a new one was provided
+        if (!empty($this->smtp_password)) {
+            $data['smtp_password'] = $this->smtp_password;
+        }
+
+        $settings->update($data);
+        $this->smtp_password = ''; // Clear password field
+        
+        // Clear config cache to apply new settings
+        Artisan::call('config:clear');
+        
+        notify()->success('Setări email actualizate cu succes!');
+    }
+
+    public function testEmail()
+    {
+        if (empty($this->test_email)) {
+            notify()->error('Completează email-ul de test!');
+            return;
+        }
+
+        if (empty($this->smtp_host)) {
+            notify()->error('Completează SMTP Host!');
+            return;
+        }
+
+        if (empty($this->smtp_from_email)) {
+            notify()->error('Completează From Email!');
+            return;
+        }
+
+        $this->validate([
+            'test_email' => 'required|email',
+            'smtp_host' => 'required|string|max:255',
+            'smtp_from_email' => 'required|email|max:255',
+        ], [
+            'test_email.required' => 'Adresa de email de test este obligatorie',
+            'test_email.email' => 'Adresa de email de test trebuie să fie validă',
+            'smtp_host.required' => 'SMTP Host este obligatoriu pentru testare',
+            'smtp_from_email.required' => 'From Email este obligatoriu pentru testare',
+        ]);
+
+        try {
+            // Temporarily apply SMTP settings for testing
+            Config::set('mail.default', 'smtp');
+            Config::set('mail.mailers.smtp.host', $this->smtp_host);
+            Config::set('mail.mailers.smtp.port', $this->smtp_port ?? 587);
+            Config::set('mail.mailers.smtp.encryption', $this->smtp_encryption ?? 'tls');
+            Config::set('mail.mailers.smtp.username', $this->smtp_username);
+            
+            // Get password from settings if not provided
+            if (empty($this->smtp_password)) {
+                $settings = Setting::getSettings();
+                Config::set('mail.mailers.smtp.password', $settings->smtp_password ?? '');
+            } else {
+                Config::set('mail.mailers.smtp.password', $this->smtp_password);
+            }
+            
+            Config::set('mail.from.address', $this->smtp_from_email);
+            Config::set('mail.from.name', $this->smtp_from_name ?? config('app.name'));
+
+            // Send test email
+            $testContent = 'Acesta este un email de test din ION CRM. Setările SMTP funcționează corect!
+
+Detalii configurare:
+- SMTP Host: ' . $this->smtp_host . '
+- SMTP Port: ' . ($this->smtp_port ?? 587) . '
+- Encryption: ' . ($this->smtp_encryption ?? 'tls') . '
+- From Email: ' . $this->smtp_from_email . '
+
+Dacă ai primit acest email, înseamnă că configurarea SMTP este corectă!';
+            
+            Mail::raw($testContent, function ($message) {
+                $message->to($this->test_email)
+                        ->subject('Test Email - ION CRM');
+            });
+
+            notify()->success('Email de test trimis cu succes la ' . $this->test_email . '!');
+        } catch (\Exception $e) {
+            notify()->error('Eroare la trimiterea email-ului de test: ' . $e->getMessage());
+        }
     }
 
     public function saveCompany()

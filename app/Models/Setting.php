@@ -22,6 +22,7 @@ class Setting extends Model
         'smtp_encryption',
         'smtp_from_name',
         'smtp_from_email',
+        'smtp_test_email',
         'telegram_bot_token',
     ];
 

@@ -386,7 +386,8 @@ class ProposalViewComponent extends Component
             }
 
             // Send email
-            Mail::to($proposal->client->email)->send(new ProposalEmail($proposal));
+            $mailable = new ProposalEmail($proposal);
+            Mail::to($proposal->client->email)->send($mailable);
             
             notify()->success('Email trimis cu succes!');
             $this->loadProposal();
