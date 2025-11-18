@@ -29,6 +29,7 @@ Route::middleware(['auth'])->group(function () {
     
     // Profil personal - accesibil pentru toți utilizatorii autentificați
     Route::get('/admin/profile', ProfileComponent::class)->name('admin.profile');
+    Route::post('/admin/profile/toggle-dark-mode', [App\Http\Controllers\DarkModeController::class, 'toggle'])->name('admin.profile.toggle-dark-mode');
     
     // Admin routes - doar pentru administratori
     Route::middleware(['admin'])->group(function () {

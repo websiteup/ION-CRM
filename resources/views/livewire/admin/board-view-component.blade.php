@@ -9,6 +9,9 @@
                 <button wire:click="openColumnModal" class="btn btn-primary">
                     <i class="bi bi-plus-circle"></i> Adaugă Coloană
                 </button>
+                <button wire:click="openBackgroundModal" class="btn btn-outline-info">
+                    <i class="bi bi-palette"></i> Background
+                </button>
                 <button wire:click="openShareModal" class="btn btn-outline-primary">
                     <i class="bi bi-share"></i> Share
                 </button>
@@ -290,6 +293,89 @@
                     <div class="modal-footer">
                         <button type="button" wire:click="closeColumnModal" class="btn btn-secondary">Anulează</button>
                         <button type="button" wire:click="saveColumn" class="btn btn-primary">Salvează</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    <!-- Background Modal -->
+    @if($showBackgroundModal)
+        <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5); z-index: 1050;">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Selectează Background</h5>
+                        <button type="button" wire:click="closeBackgroundModal" class="btn-close"></button>
+                    </div>
+                    <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+                        <!-- Gradient Backgrounds -->
+                        <div class="mb-4">
+                            <h6 class="mb-3">Gradient Backgrounds</h6>
+                            <div class="row g-3">
+                                @foreach($this->backgrounds as $key => $bg)
+                                    @if($bg['type'] === 'gradient')
+                                        <div class="col-md-3 col-sm-4 col-6">
+                                            <div class="position-relative" style="cursor: pointer;" wire:click="selectBackground('{{ $key }}')">
+                                                <div class="rounded-3 p-3 border {{ $selectedBackground === $key ? 'border-primary border-3' : 'border-secondary' }}" 
+                                                     style="background: {{ $bg['value'] }}; min-height: 100px; position: relative;">
+                                                    @if($bg['icon'])
+                                                        <div class="text-center text-white" style="font-size: 2rem;">
+                                                            <i class="bi {{ $bg['icon'] }}"></i>
+                                                        </div>
+                                                    @endif
+                                                    @if($selectedBackground === $key)
+                                                        <div class="position-absolute top-0 end-0 m-2">
+                                                            <i class="bi bi-check-circle-fill text-white" style="font-size: 1.5rem; text-shadow: 0 0 3px rgba(0,0,0,0.5);"></i>
+                                                        </div>
+                                                    @endif
+                                                </div>
+                                                <div class="text-center mt-2 small">
+                                                    {{ $bg['name'] }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endif
+                                @endforeach
+                            </div>
+                        </div>
+
+                        <!-- Solid Colors -->
+                        <div class="mb-4">
+                            <h6 class="mb-3">Solid Colors</h6>
+                            <div class="row g-3">
+                                @foreach($this->backgrounds as $key => $bg)
+                                    @if($bg['type'] === 'solid')
+                                        <div class="col-md-2 col-sm-3 col-4">
+                                            <div class="position-relative" style="cursor: pointer;" wire:click="selectBackground('{{ $key }}')">
+                                                <div class="rounded-3 p-3 border {{ $selectedBackground === $key ? 'border-primary border-3' : 'border-secondary' }}" 
+                                                     style="background-color: {{ $bg['value'] }}; min-height: 80px; position: relative;">
+                                                    @if($selectedBackground === $key)
+                                                        <div class="position-absolute top-50 start-50 translate-middle">
+                                                            <i class="bi bi-check-circle-fill text-white" style="font-size: 1.5rem; text-shadow: 0 0 3px rgba(0,0,0,0.5);"></i>
+                                                        </div>
+                                                    @endif
+                                                </div>
+                                                <div class="text-center mt-2 small">
+                                                    {{ $bg['name'] }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endif
+                                @endforeach
+                            </div>
+                        </div>
+
+                        <!-- Reset Option -->
+                        <div class="mb-3">
+                            <button wire:click="selectBackground('')" class="btn btn-outline-secondary w-100">
+                                <i class="bi bi-x-circle"></i> Resetează la Background Implicit
+                            </button>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" wire:click="closeBackgroundModal" class="btn btn-secondary">Anulează</button>
+                        <button type="button" wire:click="saveBackground" class="btn btn-primary">Salvează</button>
                     </div>
                 </div>
             </div>

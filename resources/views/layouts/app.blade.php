@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-bs-theme="{{ Auth::check() && Auth::user()->dark_mode ? 'dark' : 'light' }}" id="html-theme">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -43,101 +43,96 @@
                 
                 <nav class="sidebar-nav">
                     @if(Auth::user()->hasRole('admin'))
+                        <!-- Dashboard -->
                         <a href="{{ route('admin.dashboard') }}" class="sidebar-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
                             <i class="bi bi-speedometer2"></i>
                             <span>Dashboard</span>
                         </a>
-                        <a href="{{ route('admin.clients.index') }}" class="sidebar-link {{ request()->routeIs('admin.clients.*') ? 'active' : '' }}">
-                            <i class="bi bi-people"></i>
-                            <span>Clienți</span>
-                        </a>
-                        <a href="{{ route('admin.services.index') }}" class="sidebar-link {{ request()->routeIs('admin.services.*') ? 'active' : '' }}">
-                            <i class="bi bi-briefcase"></i>
-                            <span>Servicii</span>
-                        </a>
-                        <a href="{{ route('admin.users.index') }}" class="sidebar-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
-                            <i class="bi bi-person-badge"></i>
-                            <span>Utilizatori</span>
-                        </a>
-                    <a href="{{ route('admin.settings.index') }}" class="sidebar-link {{ request()->routeIs('admin.settings.*') ? 'active' : '' }}">
-                        <i class="bi bi-gear"></i>
-                        <span>Setări</span>
-                    </a>
-                    <a href="{{ route('admin.emails.index') }}" class="sidebar-link {{ request()->routeIs('admin.emails.*') ? 'active' : '' }}">
-                        <i class="bi bi-envelope-check"></i>
-                        <span>Log Email-uri</span>
-                    </a>
-                    <a href="{{ route('admin.proposals.index') }}" class="sidebar-link {{ request()->routeIs('admin.proposals.*') ? 'active' : '' }}">
-                        <i class="bi bi-file-earmark-text"></i>
-                        <span>Oferte</span>
-                    </a>
-                        <a href="{{ route('admin.proposals.templates') }}" class="sidebar-link {{ request()->routeIs('admin.proposals.templates') ? 'active' : '' }}">
-                            <i class="bi bi-file-earmark-medical"></i>
-                            <span>Template-uri Oferte</span>
-                        </a>
+                        
+                        <div class="sidebar-divider"></div>
+                        
+                        <!-- Management -->
+                        <div class="sidebar-group">
+                            <div class="sidebar-group-label">Management</div>
+                            <a href="{{ route('admin.clients.index') }}" class="sidebar-link {{ request()->routeIs('admin.clients.*') ? 'active' : '' }}">
+                                <i class="bi bi-people"></i>
+                                <span>Clienți</span>
+                            </a>
+                            <a href="{{ route('admin.services.index') }}" class="sidebar-link {{ request()->routeIs('admin.services.*') ? 'active' : '' }}">
+                                <i class="bi bi-briefcase"></i>
+                                <span>Servicii</span>
+                            </a>
+                            <a href="{{ route('admin.users.index') }}" class="sidebar-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
+                                <i class="bi bi-person-badge"></i>
+                                <span>Utilizatori</span>
+                            </a>
+                        </div>
+                        
+                        <div class="sidebar-divider"></div>
+                        
+                        <!-- Oferte -->
+                        <div class="sidebar-group">
+                            <div class="sidebar-group-label">Oferte</div>
+                            <a href="{{ route('admin.proposals.index') }}" class="sidebar-link {{ request()->routeIs('admin.proposals.*') ? 'active' : '' }}">
+                                <i class="bi bi-file-earmark-text"></i>
+                                <span>Oferte</span>
+                            </a>
+                            <a href="{{ route('admin.proposals.templates') }}" class="sidebar-link {{ request()->routeIs('admin.proposals.templates') ? 'active' : '' }}">
+                                <i class="bi bi-file-earmark-medical"></i>
+                                <span>Template-uri Oferte</span>
+                            </a>
+                        </div>
                     @endif
                     
                     @if(Auth::user()->hasRole('admin') || Auth::user()->hasRole('manager'))
-                        <a href="{{ route('admin.projects.index') }}" class="sidebar-link {{ request()->routeIs('admin.projects.*') ? 'active' : '' }}">
-                            <i class="bi bi-folder"></i>
-                            <span>Proiecte</span>
-                        </a>
-                        <a href="{{ route('admin.boards.index') }}" class="sidebar-link {{ request()->routeIs('admin.boards.*') ? 'active' : '' }}">
-                            <i class="bi bi-kanban"></i>
-                            <span>Board-uri</span>
-                        </a>
+                        <div class="sidebar-divider"></div>
+                        
+                        <!-- Proiecte -->
+                        <div class="sidebar-group">
+                            <div class="sidebar-group-label">Proiecte</div>
+                            <a href="{{ route('admin.projects.index') }}" class="sidebar-link {{ request()->routeIs('admin.projects.*') ? 'active' : '' }}">
+                                <i class="bi bi-folder"></i>
+                                <span>Proiecte</span>
+                            </a>
+                            <a href="{{ route('admin.boards.index') }}" class="sidebar-link {{ request()->routeIs('admin.boards.*') ? 'active' : '' }}">
+                                <i class="bi bi-kanban"></i>
+                                <span>Board-uri</span>
+                            </a>
+                        </div>
+                    @endif
+                    
+                    @if(Auth::user()->hasRole('admin'))
+                        <div class="sidebar-divider"></div>
+                        
+                        <!-- Sistem -->
+                        <div class="sidebar-group">
+                            <div class="sidebar-group-label">Sistem</div>
+                            <a href="{{ route('admin.emails.index') }}" class="sidebar-link {{ request()->routeIs('admin.emails.*') ? 'active' : '' }}">
+                                <i class="bi bi-envelope-check"></i>
+                                <span>Log Email-uri</span>
+                            </a>
+                        </div>
                     @endif
                     
                     <div class="sidebar-divider"></div>
                     
-                    <a href="{{ route('admin.profile') }}" class="sidebar-link {{ request()->routeIs('admin.profile') ? 'active' : '' }}">
-                        <i class="bi bi-person"></i>
-                        <span>Profilul Meu</span>
-                    </a>
+                    <!-- Cont -->
+                    <div class="sidebar-group">
+                        <div class="sidebar-group-label">Cont</div>
+                        <a href="{{ route('admin.profile') }}" class="sidebar-link {{ request()->routeIs('admin.profile') ? 'active' : '' }}">
+                            <i class="bi bi-person"></i>
+                            <span>Profilul Meu</span>
+                        </a>
+                    </div>
                 </nav>
                 
                 <div class="sidebar-footer">
-                    <div class="sidebar-user">
-                        <div class="sidebar-user-info">
-                            @if(Auth::user()->profile_photo)
-                                <img src="{{ asset('storage/' . Auth::user()->profile_photo) }}" alt="{{ Auth::user()->name }}" class="sidebar-user-avatar">
-                            @else
-                                <div class="sidebar-user-avatar-placeholder">
-                                    <i class="bi bi-person"></i>
-                                </div>
-                            @endif
-                            <div class="sidebar-user-details">
-                                <div class="sidebar-user-name">{{ Auth::user()->name }}</div>
-                                <div class="sidebar-user-role">
-                                    @if(Auth::user()->hasRole('admin'))
-                                        <span class="badge bg-primary">Administrator</span>
-                                    @else
-                                        <span class="badge bg-secondary">Utilizator</span>
-                                    @endif
-                                </div>
-                            </div>
-                        </div>
-                        <div class="dropdown">
-                            <button class="btn btn-link sidebar-user-dropdown" type="button" id="userDropdown" data-bs-toggle="dropdown">
-                                <i class="bi bi-three-dots-vertical"></i>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                                <li><a class="dropdown-item" href="{{ route('admin.profile') }}"><i class="bi bi-person me-2"></i> Profilul Meu</a></li>
-                                @if(Auth::user()->hasRole('admin'))
-                                    <li><a class="dropdown-item" href="{{ route('admin.users.index') }}"><i class="bi bi-people me-2"></i> Utilizatori</a></li>
-                                    <li><hr class="dropdown-divider"></li>
-                                @endif
-                                <li>
-                                    <a class="dropdown-item" href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                                        <i class="bi bi-box-arrow-right me-2"></i> Logout
-                                    </a>
-                                    <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
-                                        @csrf
-                                    </form>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
+                    @if(Auth::user()->hasRole('admin'))
+                        <a href="{{ route('admin.settings.index') }}" class="sidebar-link {{ request()->routeIs('admin.settings.*') ? 'active' : '' }}">
+                            <i class="bi bi-gear"></i>
+                            <span>Setări</span>
+                        </a>
+                    @endif
                 </div>
             </div>
 
@@ -174,12 +169,58 @@
                         </div>
                     </div>
                     <div class="topbar-right">
-                        <!-- Reserved for future features -->
+                        @auth
+                            <div class="d-flex align-items-center gap-2">
+                                <!-- Dark Mode Toggle -->
+                                <button class="btn btn-link topbar-action-btn" id="darkModeToggle" title="Toggle Dark Mode">
+                                    <i class="bi bi-moon-stars" id="darkModeIcon"></i>
+                                </button>
+                                
+                                <!-- User Info -->
+                                <div class="topbar-user">
+                                    @if(Auth::user()->profile_photo)
+                                        <img src="{{ asset('storage/' . Auth::user()->profile_photo) }}" alt="{{ Auth::user()->name }}" class="topbar-user-avatar">
+                                    @else
+                                        <div class="topbar-user-avatar-placeholder">
+                                            <i class="bi bi-person"></i>
+                                        </div>
+                                    @endif
+                                    <div class="topbar-user-info d-none d-md-block">
+                                        <div class="topbar-user-name">{{ Auth::user()->name }}</div>
+                                        @if(Auth::user()->hasRole('admin'))
+                                            <span class="badge bg-primary topbar-user-badge">Administrator</span>
+                                        @else
+                                            <span class="badge bg-secondary topbar-user-badge">Utilizator</span>
+                                        @endif
+                                    </div>
+                                    <div class="dropdown">
+                                        <button class="btn btn-link topbar-action-btn" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <i class="bi bi-three-dots-vertical"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                            <li><a class="dropdown-item" href="{{ route('admin.profile') }}"><i class="bi bi-person me-2"></i> Profilul Meu</a></li>
+                                            @if(Auth::user()->hasRole('admin'))
+                                                <li><a class="dropdown-item" href="{{ route('admin.users.index') }}"><i class="bi bi-people me-2"></i> Utilizatori</a></li>
+                                                <li><hr class="dropdown-divider"></li>
+                                            @endif
+                                            <li>
+                                                <a class="dropdown-item text-danger" href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                                    <i class="bi bi-box-arrow-right me-2"></i> Logout
+                                                </a>
+                                                <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                                                    @csrf
+                                                </form>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        @endauth
                     </div>
                 </nav>
 
                 <!-- Main Content -->
-                <main class="main-content">
+                <main class="main-content" style="{{ $boardBackground ?? '' }}">
                     @isset($slot)
                         {{ $slot }}
                     @else
@@ -267,6 +308,57 @@
         // Legacy Livewire 2.x support
         window.addEventListener('toastify', event => {
             showToastify(event.detail.type, event.detail.message);
+        });
+
+        // Dark Mode Toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            const darkModeToggle = document.getElementById('darkModeToggle');
+            const darkModeIcon = document.getElementById('darkModeIcon');
+            const htmlElement = document.getElementById('html-theme');
+            
+            if (!htmlElement) return;
+            
+            // Load dark mode preference
+            const darkMode = @json(Auth::check() ? Auth::user()->dark_mode : false);
+            if (darkMode) {
+                htmlElement.setAttribute('data-bs-theme', 'dark');
+                if (darkModeIcon) {
+                    darkModeIcon.classList.remove('bi-moon-stars');
+                    darkModeIcon.classList.add('bi-sun');
+                }
+            }
+            
+            if (darkModeToggle) {
+                darkModeToggle.addEventListener('click', function() {
+                    const currentTheme = htmlElement.getAttribute('data-bs-theme');
+                    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                    
+                    htmlElement.setAttribute('data-bs-theme', newTheme);
+                    
+                    // Update icon
+                    if (darkModeIcon) {
+                        if (newTheme === 'dark') {
+                            darkModeIcon.classList.remove('bi-moon-stars');
+                            darkModeIcon.classList.add('bi-sun');
+                        } else {
+                            darkModeIcon.classList.remove('bi-sun');
+                            darkModeIcon.classList.add('bi-moon-stars');
+                        }
+                    }
+                    
+                    // Save preference via AJAX
+                    @auth
+                        fetch('{{ route("admin.profile.toggle-dark-mode") }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                            },
+                            body: JSON.stringify({ dark_mode: newTheme === 'dark' })
+                        }).catch(err => console.error('Error saving dark mode preference:', err));
+                    @endauth
+                });
+            }
         });
 
         // Sidebar toggle for mobile

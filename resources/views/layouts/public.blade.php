@@ -11,7 +11,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
 </head>
 <body>
-    <div class="container-fluid py-4">
+    <div class="container-fluid py-4" style="{{ $boardBackground ?? '' }}; min-height: 100vh;">
         @isset($slot)
             {{ $slot }}
         @else

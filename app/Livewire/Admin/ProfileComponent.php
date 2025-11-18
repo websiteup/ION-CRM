@@ -36,6 +36,9 @@ class ProfileComponent extends Component
     public $notification_task_assigned = true;
     public $notification_task_updated = true;
     public $notification_task_deadline = true;
+    
+    // Dark Mode
+    public $dark_mode = false;
 
     protected $rules = [
         'first_name' => 'required|string|max:255',
@@ -55,6 +58,7 @@ class ProfileComponent extends Component
         'notification_task_assigned' => 'boolean',
         'notification_task_updated' => 'boolean',
         'notification_task_deadline' => 'boolean',
+        'dark_mode' => 'boolean',
     ];
 
     public function mount()
@@ -78,6 +82,7 @@ class ProfileComponent extends Component
         $this->notification_task_assigned = $user->notification_task_assigned ?? true;
         $this->notification_task_updated = $user->notification_task_updated ?? true;
         $this->notification_task_deadline = $user->notification_task_deadline ?? true;
+        $this->dark_mode = $user->dark_mode ?? false;
     }
 
     public function updated($propertyName)
@@ -116,6 +121,7 @@ class ProfileComponent extends Component
             'notification_task_assigned' => $this->notification_task_assigned,
             'notification_task_updated' => $this->notification_task_updated,
             'notification_task_deadline' => $this->notification_task_deadline,
+            'dark_mode' => $this->dark_mode,
         ];
 
         if ($this->profile_photo) {

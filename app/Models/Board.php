@@ -15,6 +15,7 @@ class Board extends Model
         'project_id',
         'is_public',
         'public_hash',
+        'background',
         'created_by',
         'updated_by',
     ];

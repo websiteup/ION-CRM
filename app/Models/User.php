@@ -34,6 +34,7 @@ class User extends Authenticatable
         'notification_task_assigned',
         'notification_task_updated',
         'notification_task_deadline',
+        'dark_mode',
     ];
 
     /**
@@ -62,6 +63,7 @@ class User extends Authenticatable
             'notification_task_assigned' => 'boolean',
             'notification_task_updated' => 'boolean',
             'notification_task_deadline' => 'boolean',
+            'dark_mode' => 'boolean',
         ];
     }
 

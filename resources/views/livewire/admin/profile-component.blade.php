@@ -130,6 +130,17 @@
                                 </div>
                             </div>
                             <hr>
+                            <h6 class="mb-3">Aspect</h6>
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" wire:model="dark_mode" id="dark_mode">
+                                    <label class="form-check-label" for="dark_mode">
+                                        <i class="bi bi-moon-stars"></i> Mod întunecat (Dark Mode)
+                                    </label>
+                                </div>
+                                <small class="text-muted">Activează modul întunecat pentru interfață</small>
+                            </div>
+                            <hr>
                             <h6 class="mb-3">Conectare Telegram</h6>
                             <div class="mb-3">
                                 <label for="telegram_chat_id" class="form-label">Telegram Chat ID</label>
