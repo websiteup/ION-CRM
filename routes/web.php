@@ -19,7 +19,7 @@ use App\Livewire\Admin\ProposalTemplatesComponent;
 use App\Livewire\Admin\SentEmailsComponent;
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('home');
 });
 
 Auth::routes();
