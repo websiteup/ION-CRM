@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\DB;
 
 class SettingsComponent extends Component
 {
@@ -38,6 +39,11 @@ class SettingsComponent extends Component
     public $smtp_from_email = '';
     public $telegram_bot_token = '';
     public $test_email = '';
+
+    // Google Calendar Settings
+    public $google_calendar_client_id = '';
+    public $google_calendar_client_secret = '';
+    public $google_calendar_redirect_uri = '';
 
     // Company Settings
     public $company_name = '';
@@ -131,6 +137,14 @@ class SettingsComponent extends Component
         $this->smtp_from_email = $settings->smtp_from_email ?? '';
         $this->test_email = $settings->smtp_test_email ?? '';
         $this->telegram_bot_token = $settings->telegram_bot_token ?? '';
+        $this->google_calendar_client_id = $settings->google_calendar_client_id ?? '';
+        $this->google_calendar_client_secret = $settings->google_calendar_client_secret ?? '';
+        // Default redirect URI - use 127.0.0.1 if app.url contains localhost
+        $defaultRedirectUri = config('app.url');
+        if (str_contains($defaultRedirectUri, 'localhost')) {
+            $defaultRedirectUri = str_replace('localhost', '127.0.0.1', $defaultRedirectUri);
+        }
+        $this->google_calendar_redirect_uri = $settings->google_calendar_redirect_uri ?? ($defaultRedirectUri . '/admin/calendar/callback');
 
         // Load Company Settings
         $company = Company::getCompany();
@@ -501,17 +515,91 @@ Dacă ai primit acest email, înseamnă că configurarea SMTP este corectă!';
         notify()->success('Limbă default setată cu succes!');
     }
 
+    public function saveGoogleCalendar()
+    {
+        $this->validate([
+            'google_calendar_client_id' => 'nullable|string|max:255',
+            'google_calendar_client_secret' => 'nullable|string|max:255',
+            'google_calendar_redirect_uri' => 'nullable|url|max:255',
+        ]);
+
+        $settings = Setting::getSettings();
+        
+        // Default redirect URI - use 127.0.0.1 if app.url contains localhost
+        $defaultRedirectUri = config('app.url');
+        if (str_contains($defaultRedirectUri, 'localhost')) {
+            $defaultRedirectUri = str_replace('localhost', '127.0.0.1', $defaultRedirectUri);
+        }
+        
+        $data = [
+            'google_calendar_client_id' => $this->google_calendar_client_id,
+            'google_calendar_client_secret' => $this->google_calendar_client_secret,
+            'google_calendar_redirect_uri' => $this->google_calendar_redirect_uri ?: ($defaultRedirectUri . '/admin/calendar/callback'),
+        ];
+
+        $settings->update($data);
+        
+        // Clear config cache to apply new settings
+        Artisan::call('config:clear');
+        
+        notify()->success('Setări Google Calendar actualizate cu succes!');
+    }
+
     public function render()
     {
         $taxRates = TaxRate::orderBy('is_default', 'desc')->orderBy('rate', 'desc')->get();
         $currencies = Currency::orderBy('is_default', 'desc')->orderBy('code')->get();
         $languages = Language::orderBy('is_default', 'desc')->orderBy('name')->get();
 
+        $databaseConnection = config('database.default');
+        $databaseConfig = config("database.connections.$databaseConnection", []);
+
+        $platformInfo = [
+            'app_name' => config('app.name'),
+            'app_env' => config('app.env'),
+            'app_url' => config('app.url'),
+            'app_version' => config('app.version', 'N/A'),
+            'laravel_version' => app()->version(),
+        ];
+
+        $serverInfo = [
+            'php_version' => PHP_VERSION,
+            'php_sapi' => php_sapi_name(),
+            'server_os' => PHP_OS_FAMILY . ' ' . php_uname('r'),
+            'server_software' => request()->server('SERVER_SOFTWARE') ?? 'N/A',
+            'memory_limit' => ini_get('memory_limit'),
+            'upload_max_filesize' => ini_get('upload_max_filesize'),
+            'post_max_size' => ini_get('post_max_size'),
+            'max_execution_time' => ini_get('max_execution_time') . 's',
+        ];
+
+        $databaseInfo = [
+            'connection' => $databaseConnection,
+            'driver' => $databaseConfig['driver'] ?? 'N/A',
+            'host' => $databaseConfig['host'] ?? 'N/A',
+            'database' => $databaseConfig['database'] ?? 'N/A',
+            'port' => $databaseConfig['port'] ?? 'N/A',
+            'version' => $this->getDatabaseVersion(),
+        ];
+
         return view('livewire.admin.settings-component', [
             'taxRates' => $taxRates,
             'currencies' => $currencies,
             'languages' => $languages,
+            'platformInfo' => $platformInfo,
+            'serverInfo' => $serverInfo,
+            'databaseInfo' => $databaseInfo,
         ])->layout('layouts.app');
+    }
+
+    private function getDatabaseVersion(): string
+    {
+        try {
+            $pdo = DB::connection()->getPdo();
+            return $pdo->getAttribute(\PDO::ATTR_SERVER_VERSION);
+        } catch (\Throwable $e) {
+            return 'N/A';
+        }
     }
 }
 

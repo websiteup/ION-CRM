@@ -25,6 +25,37 @@
     <!-- Summernote JS -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote-lite.min.js"></script>
+    
+    @stack('styles')
+    
+    <!-- FullCalendar - Load in head for calendar pages -->
+    @if(request()->routeIs('admin.calendar') || str_contains(request()->url(), '/admin/calendar'))
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/main.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/main.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/locales/ro.js"></script>
+    <script>
+        // Verify FullCalendar loaded
+        window.addEventListener('load', function() {
+            console.log('Page loaded, checking FullCalendar...');
+            console.log('FullCalendar type:', typeof FullCalendar);
+            if (typeof FullCalendar === 'undefined') {
+                console.error('FullCalendar failed to load from jsdelivr, trying unpkg...');
+                // Fallback to unpkg
+                const script = document.createElement('script');
+                script.src = 'https://unpkg.com/fullcalendar@6.1.10/index.global.min.js';
+                script.onload = function() {
+                    console.log('FullCalendar loaded from unpkg');
+                };
+                script.onerror = function() {
+                    console.error('FullCalendar failed to load from unpkg too');
+                };
+                document.head.appendChild(script);
+            } else {
+                console.log('FullCalendar loaded successfully from jsdelivr');
+            }
+        });
+    </script>
+    @endif
 </head>
 <body>
     <div id="app" class="d-flex">
@@ -98,6 +129,10 @@
                                 <i class="bi bi-kanban"></i>
                                 <span>Board-uri</span>
                             </a>
+                            <a href="{{ route('admin.calendar') }}" class="sidebar-link {{ request()->routeIs('admin.calendar*') ? 'active' : '' }}">
+                                <i class="bi bi-calendar-event"></i>
+                                <span>Calendar</span>
+                            </a>
                         </div>
                     @endif
                     
@@ -163,6 +198,8 @@
                                     $pageTitle = request()->routeIs('admin.boards.view') ? 'Board' : 'Board-uri';
                                 } elseif (request()->routeIs('admin.projects.*')) {
                                     $pageTitle = request()->routeIs('admin.projects.view') ? 'Proiect' : 'Proiecte';
+                                } elseif (request()->routeIs('admin.calendar*')) {
+                                    $pageTitle = 'Calendar';
                                 }
                             @endphp
                             {{ $pageTitle }}

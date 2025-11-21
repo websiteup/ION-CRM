@@ -43,6 +43,16 @@
                     <i class="bi bi-envelope"></i> Email
                 </button>
             </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link {{ $activeTab === 'google_calendar' ? 'active' : '' }}" wire:click="switchTab('google_calendar')" type="button">
+                    <i class="bi bi-calendar-event"></i> Google Calendar
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link {{ $activeTab === 'system' ? 'active' : '' }}" wire:click="switchTab('system')" type="button">
+                    <i class="bi bi-hdd-network"></i> Platformă & Server
+                </button>
+            </li>
         </ul>
 
         <!-- Tab Content -->
@@ -120,6 +130,116 @@
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            @endif
+
+            <!-- Platform & Server Tab -->
+            @if($activeTab === 'system')
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Informații Platformă & Server</h5>
+                        <span class="badge bg-secondary">read-only</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-4">
+                            <div class="col-lg-4 col-md-6">
+                                <h6 class="text-uppercase text-muted">Platformă</h6>
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-borderless mb-0">
+                                        <tbody>
+                                            <tr>
+                                                <th class="text-muted">Nume aplicație</th>
+                                                <td>{{ $platformInfo['app_name'] ?? 'N/A' }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th class="text-muted">Versiune aplicație</th>
+                                                <td>{{ $platformInfo['app_version'] ?? 'N/A' }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th class="text-muted">Laravel</th>
+                                                <td>{{ $platformInfo['laravel_version'] ?? 'N/A' }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th class="text-muted">Mediu rulare</th>
+                                                <td><span class="badge bg-info">{{ $platformInfo['app_env'] ?? 'N/A' }}</span></td>
+                                            </tr>
+                                            <tr>
+                                                <th class="text-muted">URL aplicație</th>
+                                                <td><a href="{{ $platformInfo['app_url'] ?? '#' }}" target="_blank">{{ $platformInfo['app_url'] ?? '-' }}</a></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 col-md-6">
+                                <h6 class="text-uppercase text-muted">Server</h6>
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-borderless mb-0">
+                                        <tbody>
+                                            <tr>
+                                                <th class="text-muted">PHP Version</th>
+                                                <td>{{ $serverInfo['php_version'] }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th class="text-muted">SAPI</th>
+                                                <td>{{ $serverInfo['php_sapi'] }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th class="text-muted">OS</th>
+                                                <td>{{ $serverInfo['server_os'] }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th class="text-muted">Server Software</th>
+                                                <td>{{ $serverInfo['server_software'] }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th class="text-muted">Limits</th>
+                                                <td>
+                                                    <div>Memory: {{ $serverInfo['memory_limit'] }}</div>
+                                                    <div>Upload: {{ $serverInfo['upload_max_filesize'] }}</div>
+                                                    <div>Post: {{ $serverInfo['post_max_size'] }}</div>
+                                                    <div>Exec: {{ $serverInfo['max_execution_time'] }}</div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 col-md-12">
+                                <h6 class="text-uppercase text-muted">Bază de date</h6>
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-borderless mb-0">
+                                        <tbody>
+                                            <tr>
+                                                <th class="text-muted">Conexiune</th>
+                                                <td><span class="badge bg-dark">{{ $databaseInfo['connection'] }}</span></td>
+                                            </tr>
+                                            <tr>
+                                                <th class="text-muted">Driver</th>
+                                                <td>{{ $databaseInfo['driver'] }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th class="text-muted">Host</th>
+                                                <td>{{ $databaseInfo['host'] }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th class="text-muted">Bază de date</th>
+                                                <td>{{ $databaseInfo['database'] }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th class="text-muted">Port</th>
+                                                <td>{{ $databaseInfo['port'] }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th class="text-muted">Versiune server</th>
+                                                <td>{{ $databaseInfo['version'] }}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             @endif
@@ -215,6 +335,54 @@
                                 @endif
                                 <button type="submit" class="btn btn-primary">
                                     <i class="bi bi-save"></i> Salvează Setări Email
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            @endif
+
+            <!-- Google Calendar Tab -->
+            @if($activeTab === 'google_calendar')
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Setări Google Calendar API</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> 
+                            <strong>Instrucțiuni:</strong> Pentru a configura Google Calendar API:
+                            <ol class="mb-0 mt-2">
+                                <li>Mergi la <a href="https://console.cloud.google.com/" target="_blank">Google Cloud Console</a></li>
+                                <li>Creează un proiect nou sau selectează unul existent</li>
+                                <li>Activează Google Calendar API</li>
+                                <li>Creează OAuth 2.0 credentials (Application type: Web application)</li>
+                                <li>Adaugă Redirect URI: <code>{{ $google_calendar_redirect_uri ?: (str_replace('localhost', '127.0.0.1', config('app.url')) . '/admin/calendar/callback') }}</code></li>
+                                <li>Copiază Client ID și Client Secret aici</li>
+                            </ol>
+                        </div>
+                        <form wire:submit.prevent="saveGoogleCalendar">
+                            <div class="mb-3">
+                                <label for="google_calendar_client_id" class="form-label">Client ID</label>
+                                <input type="text" wire:model="google_calendar_client_id" class="form-control @error('google_calendar_client_id') is-invalid @enderror" id="google_calendar_client_id" placeholder="xxxxx.apps.googleusercontent.com">
+                                @error('google_calendar_client_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                <small class="form-text text-muted">Client ID din Google Cloud Console</small>
+                            </div>
+                            <div class="mb-3">
+                                <label for="google_calendar_client_secret" class="form-label">Client Secret</label>
+                                <input type="password" wire:model="google_calendar_client_secret" class="form-control @error('google_calendar_client_secret') is-invalid @enderror" id="google_calendar_client_secret" placeholder="GOCSPX-xxxxx">
+                                @error('google_calendar_client_secret') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                <small class="form-text text-muted">Client Secret din Google Cloud Console</small>
+                            </div>
+                            <div class="mb-3">
+                                <label for="google_calendar_redirect_uri" class="form-label">Redirect URI</label>
+                                <input type="url" wire:model="google_calendar_redirect_uri" class="form-control @error('google_calendar_redirect_uri') is-invalid @enderror" id="google_calendar_redirect_uri" placeholder="{{ str_replace('localhost', '127.0.0.1', config('app.url')) }}/admin/calendar/callback">
+                                @error('google_calendar_redirect_uri') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                <small class="form-text text-muted">URI-ul de redirectare pentru OAuth (trebuie să fie același ca în Google Cloud Console)</small>
+                            </div>
+                            <div class="d-flex justify-content-end">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-save"></i> Salvează Setări Google Calendar
                                 </button>
                             </div>
                         </form>

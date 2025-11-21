@@ -17,6 +17,7 @@ use App\Livewire\Admin\ProposalsComponent;
 use App\Livewire\Admin\ProposalViewComponent;
 use App\Livewire\Admin\ProposalTemplatesComponent;
 use App\Livewire\Admin\SentEmailsComponent;
+use App\Livewire\Admin\CalendarComponent;
 
 Route::get('/', function () {
     return view('home');
@@ -55,6 +56,13 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/admin/projects', ProjectsComponent::class)->name('admin.projects.index');
         Route::get('/admin/projects/{id}', ProjectViewComponent::class)->name('admin.projects.view');
     });
+
+    // Calendar routes - pentru toți utilizatorii autentificați
+    Route::get('/admin/calendar', CalendarComponent::class)->name('admin.calendar');
+    Route::get('/admin/calendar/connect', [App\Http\Controllers\GoogleCalendarController::class, 'connect'])->name('admin.calendar.connect');
+    Route::get('/admin/calendar/callback', [App\Http\Controllers\GoogleCalendarController::class, 'callback'])->name('admin.calendar.callback');
+    Route::post('/admin/calendar/disconnect', [App\Http\Controllers\GoogleCalendarController::class, 'disconnect'])->name('admin.calendar.disconnect');
+    Route::post('/admin/calendar/sync', [App\Http\Controllers\GoogleCalendarController::class, 'syncAll'])->name('admin.calendar.sync');
 });
 
 // Public routes

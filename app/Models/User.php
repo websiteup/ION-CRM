@@ -35,6 +35,8 @@ class User extends Authenticatable
         'notification_task_updated',
         'notification_task_deadline',
         'dark_mode',
+        'google_calendar_token',
+        'google_calendar_id',
     ];
 
     /**

@@ -24,6 +24,9 @@ class Setting extends Model
         'smtp_from_email',
         'smtp_test_email',
         'telegram_bot_token',
+        'google_calendar_client_id',
+        'google_calendar_client_secret',
+        'google_calendar_redirect_uri',
     ];
 
     protected $casts = [

@@ -8,6 +8,7 @@ use App\Models\BoardColumn;
 use App\Models\Task;
 use App\Models\Label;
 use App\Models\User;
+use App\Services\GoogleCalendarService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -344,6 +345,21 @@ class BoardViewComponent extends Component
                 }
             }
             
+            // Sync to Google Calendar if user is connected
+            if ($task->due_date && $task->assigned_to) {
+                try {
+                    $assignedUser = User::find($task->assigned_to);
+                    if ($assignedUser && app(GoogleCalendarService::class)->isConnected($assignedUser)) {
+                        $eventId = app(GoogleCalendarService::class)->syncTaskToCalendar($task, $assignedUser);
+                        if ($eventId) {
+                            $task->update(['google_calendar_event_id' => $eventId]);
+                        }
+                    }
+                } catch (\Exception $e) {
+                    Log::error('Failed to sync task to Google Calendar: ' . $e->getMessage());
+                }
+            }
+            
             notify()->success('Task-ul "' . $this->taskTitle . '" a fost actualizat cu succes!');
         } else {
             $data['created_by'] = Auth::id();
@@ -404,6 +420,21 @@ class BoardViewComponent extends Component
                         Log::error("Eroare la trimiterea notificării Telegram ({$notificationType}) către utilizator {$user->id}: " . $e->getMessage());
                         Log::error("Stack trace: " . $e->getTraceAsString());
                     }
+                }
+            }
+            
+            // Sync to Google Calendar if user is connected
+            if ($task->due_date && $task->assigned_to) {
+                try {
+                    $assignedUser = User::find($task->assigned_to);
+                    if ($assignedUser && app(GoogleCalendarService::class)->isConnected($assignedUser)) {
+                        $eventId = app(GoogleCalendarService::class)->syncTaskToCalendar($task, $assignedUser);
+                        if ($eventId) {
+                            $task->update(['google_calendar_event_id' => $eventId]);
+                        }
+                    }
+                } catch (\Exception $e) {
+                    Log::error('Failed to sync task to Google Calendar: ' . $e->getMessage());
                 }
             }
             

@@ -17,6 +17,7 @@ class Task extends Model
         'assigned_to',
         'priority',
         'due_date',
+        'google_calendar_event_id',
         'position',
         'created_by',
         'updated_by',
